@@ -5,7 +5,6 @@
 /result
 .pdm-build
 
-*.sv
 .bsp/
 .cache
 .history
