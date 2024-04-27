@@ -36,6 +36,7 @@ Done so far:
     the extra toolchain weight doesn't feel like it helps me move any faster
     here.
 * A basic [UART echo], tested with Amaranth's simulator.
+* A clone of the Python simulator [with CXXRTL].
 
 [hdx]: https://hrzn.ee/kivikakk/hdx
 [pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
@@ -43,3 +44,4 @@ Done so far:
 [i2c_obs]: https://hrzn.ee/kivikakk/i2c_obs
 [sh1107]: https://hrzn.ee/kivikakk/sh1107
 [UART echo]: https://hrzn.ee/kivikakk/kalaturg/commit/cd7b97cfb697ac7def0d5d0689da9c03f403d3e0
+[with CXXRTL]: https://hrzn.ee/kivikakk/kalaturg/commit/d4c853a680c494fe9acc36aa91b83a7cd2d4d026
