@@ -11,13 +11,8 @@ class Top extends Module {
     val s = Output(Bool())
   })
 
-  private val sReg = Reg(Bool())
-
-  when(reset.asBool) {
-    sReg := 0.U
-  }.otherwise {
-    sReg := io.r
-  }
+  private val sReg = RegInit(false.B)
+  sReg := io.r
 
   io.r := io.x ^ io.y
   io.s := sReg
