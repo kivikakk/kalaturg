@@ -8,11 +8,12 @@ from . import Top
 
 class TestTop(unittest.TestCase):
     def test_top(self):
-        dut = Top()
+        dut = Top(baud=115200)
         uart = dut.test_uart
 
-        freq = 1e-6
-        c = int(1/freq//9600)
+        freq = Platform["test"].default_clk_frequency
+        c = int(freq//dut.baud)
+        print("c = ", c)
 
         def bench():
             # Hold steady for a bit.
@@ -57,7 +58,7 @@ class TestTop(unittest.TestCase):
                     yield Tick()
             
             # Ensure we reassert promptly.
-            for _ in range(c // 4):
+            for _ in range(4):
                 yield Tick()
                 if (yield uart.tx.o):
                     break

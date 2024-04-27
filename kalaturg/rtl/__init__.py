@@ -16,9 +16,10 @@ class TestUart:
 
 
 class Top(Elaboratable):
-    def __init__(self):
+    def __init__(self, *, baud=9600):
         super().__init__()
         self.test_uart = TestUart()
+        self.baud = baud
 
     def elaborate(self, platform):
         from .. import icebreaker
@@ -31,7 +32,7 @@ class Top(Elaboratable):
             case _:
                 plat_uart = self.test_uart
 
-        m.submodules.uart = uart = UART(plat_uart)
+        m.submodules.uart = uart = UART(plat_uart, baud=self.baud)
 
         # echo
         with m.FSM():
