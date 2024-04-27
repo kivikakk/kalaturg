@@ -1,0 +1,6 @@
+**/__pypackages__/
+**/__pycache__/
+/build/
+*.vcd
+/result
+.pdm-build

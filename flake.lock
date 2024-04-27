@@ -1,0 +1,173 @@
+{
+  "nodes": {
+    "abc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1713872952,
+        "narHash": "sha256-1VHI03S3POkD+LJzBdnhLy1GPzAcbEzctbUhnUPd21k=",
+        "owner": "YosysHQ",
+        "repo": "abc",
+        "rev": "03da96f12fb4deb153cc0dc73936df346ecd4bcf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "YosysHQ",
+        "repo": "abc",
+        "rev": "03da96f12fb4deb153cc0dc73936df346ecd4bcf",
+        "type": "github"
+      }
+    },
+    "amaranth": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1713608936,
+        "narHash": "sha256-oIGcLM5Xa9hzSZar9+4oYgidEuugmC/idt1cb1bOkuo=",
+        "owner": "amaranth-lang",
+        "repo": "amaranth",
+        "rev": "9201cc3179d53c9fcfb6443e571533d64dbdd417",
+        "type": "github"
+      },
+      "original": {
+        "owner": "amaranth-lang",
+        "repo": "amaranth",
+        "type": "github"
+      }
+    },
+    "amaranth-boards": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1713501600,
+        "narHash": "sha256-vEw3LgdKaKLBurw07q/MKCaZNB028+vS59SZbMmrxeI=",
+        "owner": "amaranth-lang",
+        "repo": "amaranth-boards",
+        "rev": "8be265b8ed89c1bbb4d9785a14dcfa415898a9d7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "amaranth-lang",
+        "repo": "amaranth-boards",
+        "type": "github"
+      }
+    },
+    "amaranth-stdio": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1709119232,
+        "narHash": "sha256-2EEgj/7Oof6GNyzeHFndtM82fiytZoAKPMci4iDHrwY=",
+        "owner": "amaranth-lang",
+        "repo": "amaranth-stdio",
+        "rev": "ae774a5709321d5bffddbcebed09b0e350cb6282",
+        "type": "github"
+      },
+      "original": {
+        "owner": "amaranth-lang",
+        "repo": "amaranth-stdio",
+        "type": "github"
+      }
+    },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1710146030,
+        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "hdx": {
+      "inputs": {
+        "abc": "abc",
+        "amaranth": "amaranth",
+        "amaranth-boards": "amaranth-boards",
+        "amaranth-stdio": "amaranth-stdio",
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "yosys": "yosys"
+      },
+      "locked": {
+        "lastModified": 1714220499,
+        "narHash": "sha256-KZxph/PKTu78uVUAFbZWgzsCaTpKaGrHLfOGP1pDGcc=",
+        "ref": "refs/heads/main",
+        "rev": "27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b",
+        "revCount": 145,
+        "type": "git",
+        "url": "https://hrzn.ee/kivikakk/hdx"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://hrzn.ee/kivikakk/hdx"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1713995372,
+        "narHash": "sha256-fFE3M0vCoiSwCX02z8VF58jXFRj9enYUSTqjyHAjrds=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dd37924974b9202f8226ed5d74a252a9785aedf8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-23.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": [
+          "hdx",
+          "flake-utils"
+        ],
+        "hdx": "hdx",
+        "nixpkgs": [
+          "hdx",
+          "nixpkgs"
+        ]
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "yosys": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1714031784,
+        "narHash": "sha256-Txm/yRzhOl4nwWOob/u1DfSZtWQ985pm4o18QrXUlnU=",
+        "owner": "YosysHQ",
+        "repo": "yosys",
+        "rev": "34d9a7451e95f6cbbfc7d58d735c846aa7eed797",
+        "type": "github"
+      },
+      "original": {
+        "owner": "YosysHQ",
+        "repo": "yosys",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
