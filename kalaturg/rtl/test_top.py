@@ -18,7 +18,7 @@ class TestTop(unittest.TestCase):
         def bench():
             # Hold steady for a bit.
             yield uart.rx.i.eq(1)
-            for _ in range(c * 5):
+            for _ in range(c * 2):
                 yield Tick()
                 assert (yield uart.tx.o)
             
@@ -35,7 +35,7 @@ class TestTop(unittest.TestCase):
                 for _ in range(c):
                     yield Tick()
 
-            # Reassert and wait for their START.
+            # Reassert/STOP and wait for their START.
             yield uart.rx.i.eq(1)
             for _ in range(c * 4):
                 yield Tick()
@@ -57,13 +57,10 @@ class TestTop(unittest.TestCase):
                 for _ in range(c - (c // 2)):
                     yield Tick()
             
-            # Ensure we reassert promptly.
-            for _ in range(4):
+            # STOP bit and then make sure it stays that way.
+            for _ in range(c * 4):
                 yield Tick()
-                if (yield uart.tx.o):
-                    break
-            else:
-                assert False, "didn't reassert"
+                assert (yield uart.tx.o), "no STOP bit"
             print("got: ", output)
             assert inp == output
 

@@ -8,7 +8,7 @@ __all__ = ["Top"]
 class TestUart:
     class Io:
         def __init__(self, attr):
-            setattr(self, attr, Signal())
+            setattr(self, attr, Signal(name=attr))
 
     def __init__(self):
         self.rx = TestUart.Io('i')
@@ -20,6 +20,9 @@ class Top(Elaboratable):
         super().__init__()
         self.test_uart = TestUart()
         self.baud = baud
+
+    def ports(self, platform):
+        return [self.test_uart.rx.i, self.test_uart.tx.o]
 
     def elaborate(self, platform):
         from .. import icebreaker
