@@ -37,7 +37,7 @@ Done so far:
     here.
 * A basic [UART echo], tested with Amaranth's simulator.
 * A clone of the Python simulator [with CXXRTL].
-* Learn to do a [very basic module with tests][Chisel Top] and Verilog output.
+* Learn to do a [very basic Chisel module with tests][Chisel Top] and Verilog output.
 
 [hdx]: https://hrzn.ee/kivikakk/hdx
 [pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
