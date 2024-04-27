@@ -4,3 +4,16 @@
 *.vcd
 /result
 .pdm-build
+
+*.sv
+.bsp/
+.cache
+.history
+.idea/
+.lib/
+dist/*
+lib_managed/
+project/boot/
+project/plugins/project/
+src_managed/
+target/
