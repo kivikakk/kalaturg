@@ -12,7 +12,7 @@ class TopSpec extends AnyFreeSpec with Matchers {
       for { x <- 0 to 1; y <- 0 to 1 } {
         dut.io.x.poke(x)
         dut.io.y.poke(y)
-        assert(dut.io.r.peekValue().asBigInt == (x ^ y))
+        dut.io.r.expect(x ^ y)
       }
     }
   }
@@ -29,9 +29,9 @@ class TopSpec extends AnyFreeSpec with Matchers {
       for { x <- 0 to 1; y <- 0 to 1 } {
         dut.io.x.poke(x)
         dut.io.y.poke(y)
-        assert(dut.io.s.peekValue().asBigInt == last)
+        dut.io.s.expect(last)
         dut.clock.step()
-        assert(dut.io.s.peekValue().asBigInt == (x ^ y))
+        dut.io.s.expect(x ^ y)
         last = x ^ y
       }
     }

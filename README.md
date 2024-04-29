@@ -20,7 +20,10 @@ with it!
 I plan to bootstrap my way out of this hole by creating a small component in
 Amaranth, workbench it using CXXRTL, then duplicating that component in Chisel,
 using the same CXXRTL workbench to test it. This way I'm staying connected to
-"doing useful/measurable stuff" in a way I know.
+"doing useful/measurable stuff" in a way I know. I'm also furthering my own
+[HDL experiments] while I go, letting Amaranth and Chisel combine in my head.
+
+[HDL experiments]: https://github.com/kivikakk/eri
 
 Done so far:
 
@@ -37,7 +40,13 @@ Done so far:
     here.
 * A basic [UART echo], tested with Amaranth's simulator.
 * A clone of the Python simulator [with CXXRTL].
-* Learn to do a [very basic Chisel module with tests][Chisel Top] and Verilog output.
+* Learn to do a [very basic Chisel module with tests][Chisel Top] and Verilog
+  output.
+
+In progress:
+
+* Build the Chisel module with CXXRTL and integrate it into the simulator —
+  it'll be very *wrong*, but the key is the integration.
 
 [hdx]: https://hrzn.ee/kivikakk/hdx
 [pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
