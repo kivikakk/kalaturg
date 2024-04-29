@@ -4,6 +4,8 @@ import chisel3._
 import _root_.circt.stage.ChiselStage
 
 class Top extends Module {
+  override def desiredName = "top"
+
   val io = IO(new Bundle {
     val x = Input(Bool())
     val y = Input(Bool())

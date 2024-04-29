@@ -6,15 +6,23 @@
 #include <cxxrtl/cxxrtl_vcd.h>
 #include <build/kalaturg.cc>
 
+#ifndef CLOCK_NAME
+#define CLOCK_NAME clk
+#endif
+
+#define JOINER(x, y) x ## y
+#define REJOINER(x, y) JOINER(x, y)
+#define CLOCK_WIRE REJOINER(p_, CLOCK_NAME)
+
 using namespace cxxrtl_design;
 
 void cycle(p_top &top, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time) {
-  assert(!top.p_clk);
-  top.p_clk.set(true);
+  assert(!top.CLOCK_WIRE);
+  top.CLOCK_WIRE.set(true);
   top.step();
   vcd.sample(vcd_time++);
 
-  top.p_clk.set(false);
+  top.CLOCK_WIRE.set(false);
   top.step();
   vcd.sample(vcd_time++);
 }
