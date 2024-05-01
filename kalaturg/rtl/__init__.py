@@ -7,12 +7,12 @@ __all__ = ["Top"]
 
 class TestUart:
     class Io:
-        def __init__(self, attr):
-            setattr(self, attr, Signal(name=attr))
+        def __init__(self, attr, name):
+            setattr(self, attr, Signal(name=name))
 
     def __init__(self):
-        self.rx = TestUart.Io('i')
-        self.tx = TestUart.Io('o')
+        self.rx = TestUart.Io('i', 'rx')
+        self.tx = TestUart.Io('o', 'tx')
 
 
 class Top(Elaboratable):
