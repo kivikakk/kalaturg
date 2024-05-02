@@ -57,20 +57,20 @@ int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
   int c = 3e6 / 9600;
 
   // Hold steady for a bit.
-  top.p_rx.set(true);
+  top.p_io__rx.set(true);
   for (int i = 0; i < c * 2; ++i) {
     cycle(top, vcd, vcd_time);
-    if (!top.p_tx) {
+    if (!top.p_io__tx) {
       std::cerr << "output desserted during init" << std::endl;
       return 1;
     }
   }
 
   // START bit.
-  top.p_rx.set(false);
+  top.p_io__rx.set(false);
   for (int i = 0; i < c; ++i) {
     cycle(top, vcd, vcd_time);
-    if (!top.p_tx) {
+    if (!top.p_io__tx) {
       std::cerr << "output desserted during START" << std::endl;
       return 1;
     }
@@ -82,18 +82,18 @@ int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
     inp[i] = rand() % 2;
     std::cout << (inp[i] ? '1' : '0');
 
-    top.p_rx.set(inp[i]);
+    top.p_io__rx.set(inp[i]);
     for (int j = 0; j < c; ++j)
       cycle(top, vcd, vcd_time);
   }
   std::cout << std::endl;
 
   // Reassert/STOP and wait for their START.
-  top.p_rx.set(true);
+  top.p_io__rx.set(true);
   bool starting = false;
   for (int i = 0; i < c * 4; ++i) {
     cycle(top, vcd, vcd_time);
-    if (!top.p_tx) {
+    if (!top.p_io__tx) {
       starting = true;
       break;
     }
@@ -113,7 +113,7 @@ int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < c / 2; ++j)
       cycle(top, vcd, vcd_time);
-    output[i] = (bool)top.p_tx;
+    output[i] = (bool)top.p_io__tx;
     std::cout << (output[i] ? '1' : '0');
     for (int j = 0; j < c - (c / 2); ++j)
       cycle(top, vcd, vcd_time);
@@ -123,7 +123,7 @@ int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
   // STOP bit and then make sure it stays that way.
   for (int i = 0; i < c * 4; ++i) {
     cycle(top, vcd, vcd_time);
-    if (!top.p_tx) {
+    if (!top.p_io__tx) {
       std::cerr << "no STOP bit" << std::endl;
       return 1;
     }

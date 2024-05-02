@@ -11,8 +11,8 @@ class TestUart:
             setattr(self, attr, Signal(name=name))
 
     def __init__(self):
-        self.rx = TestUart.Io('i', 'rx')
-        self.tx = TestUart.Io('o', 'tx')
+        self.rx = TestUart.Io('i', 'io_rx')
+        self.tx = TestUart.Io('o', 'io_tx')
 
 
 class Top(Elaboratable):

@@ -2,21 +2,10 @@
 module top(
   input  clock,
          reset,
-         io_x,
-         io_y,
-  output io_r,
-         io_s
+         io_rx,
+  output io_tx
 );
 
-  reg  sReg;
-  wire io_r_0 = io_x ^ io_y;
-  always @(posedge clock) begin
-    if (reset)
-      sReg <= 1'h0;
-    else
-      sReg <= io_r_0;
-  end // always @(posedge)
-  assign io_r = io_r_0;
-  assign io_s = sReg;
+  assign io_tx = io_rx;
 endmodule
 
