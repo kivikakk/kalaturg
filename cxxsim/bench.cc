@@ -1,4 +1,5 @@
 #include "bench.h"
+#include "simassert.h"
 
 Bench::Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd):
   _top(top),
@@ -11,13 +12,8 @@ int Bench::run()
 {
   int c = CLOCK_HZ / 9600;
 
-  for (int i = 0; i < c * 2; ++i) {
+  for (int i = 0; i < c * 2; ++i)
     cycle();
-    if (!_top.p_io__tx) {
-      std::cerr << "output desserted during init" << std::endl;
-      return 1;
-    }
-  }
 
   uint8_t input = rand() % 256;
   std::cout << "input:  ";
@@ -26,19 +22,13 @@ int Bench::run()
   std::cout << std::endl;
 
   _uart.transmit(input);
-  for (int i = 0; i < c; ++i) {
+
+  // START + 8 bits.
+  for (int i = 0; i < 9 * c; ++i)
     cycle();
-    if (!_top.p_io__tx) {
-      std::cerr << "output desserted during START" << std::endl;
-      return 1;
-    }
-  }
 
-  for (int i = 0; i < 8; ++i) {
-    for (int j = 0; j < c; ++j)
-      cycle();
-  }
-
+  _uart.expect(input);
+  
   bool starting = false;
   for (int i = 0; i < c * 4; ++i) {
     cycle();
@@ -86,11 +76,16 @@ int Bench::run()
   return 0;
 }
 
+uint64_t Bench::cycle_number() const
+{
+  return _vcd_time >> 1;
+}
+
 void Bench::cycle()
 {
   _uart.cycle();
 
-  assert(!_top.CLOCK_WIRE);
+  simassert(!_top.CLOCK_WIRE, "cycle when clock not low");
   _top.CLOCK_WIRE.set(true);
   _top.step();
   _vcd.sample(_vcd_time++);

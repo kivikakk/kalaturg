@@ -23,6 +23,8 @@ public:
 
   int run();
 
+  uint64_t cycle_number() const;
+
 private:
   void cycle();
 

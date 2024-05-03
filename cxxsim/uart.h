@@ -10,22 +10,28 @@ public:
 
   void cycle();
   void transmit(uint8_t byte);
+  void expect(uint8_t byte);
 
 private:
-  unsigned int _divisor;
+  const unsigned int _divisor;
 
   cxxrtl::value<1> &_tx_wire;
   enum tx_state_t {
-    idle,
-    start,
-    bit,
-    stop,
+    tx_idle,
+    tx_start,
+    tx_bit,
+    tx_stop,
   } _tx_state;
   unsigned int _tx_timer;
   unsigned short _tx_counter;
   uint8_t _tx_sr;
 
   cxxrtl::value<1> &_rx_wire;
+  enum rx_state_t {
+    rx_idle,
+    rx_expecting_start,
+  } _rx_state;
+  uint8_t _rx_expected;
 };
 
 #endif

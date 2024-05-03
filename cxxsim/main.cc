@@ -6,6 +6,7 @@
 #include <cxxrtl/cxxrtl_vcd.h>
 #include <kalaturg.h>
 
+#include "simassert.h"
 #include "bench.h"
 
 int main(int argc, char **argv)
@@ -22,11 +23,19 @@ int main(int argc, char **argv)
   if (do_vcd)
     vcd.add(di);
 
-  ret = Bench(top, vcd).run();
+  Bench bench(top, vcd);
+  try {
+    ret = bench.run();
+  } catch (assertion_error &e) {
+    std::cerr
+      << "got assertion on cycle " << bench.cycle_number() << std::endl
+      << e.what() << std::endl;
 
-  if (do_vcd) {
-    std::ofstream of("cxxsim.vcd");
-    of << vcd.buffer;
+    if (do_vcd) {
+      std::ofstream of("cxxsim.vcd");
+      of << vcd.buffer;
+    }
+    ret = -1;
   }
 
   return ret;
