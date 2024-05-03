@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "main.h"
+#include "bench.h"
 #include "uart.h"
 
 UART::UART(unsigned int baud, cxxrtl::value<1> &tx_wire, cxxrtl::value<1> &rx_wire):
