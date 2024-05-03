@@ -42,11 +42,9 @@ Done so far:
 * A clone of the Python simulator [with CXXRTL].
 * Learn to do a [very basic Chisel module with tests][Chisel Top] and Verilog
   output.
-
-In progress:
-
 * Build the Chisel module with CXXRTL and integrate it into the simulator —
   it'll be very *wrong*, but the key is the integration.
+* [Write a little unbuffered UART pair, test them, integrate. **Done.**][done]
 
 [hdx]: https://hrzn.ee/kivikakk/hdx
 [pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
@@ -56,3 +54,4 @@ In progress:
 [UART echo]: https://hrzn.ee/kivikakk/kalaturg/commit/cd7b97cfb697ac7def0d5d0689da9c03f403d3e0
 [with CXXRTL]: https://hrzn.ee/kivikakk/kalaturg/commit/d4c853a680c494fe9acc36aa91b83a7cd2d4d026
 [Chisel Top]: https://hrzn.ee/kivikakk/kalaturg/commit/35a791d597e0f31a2affda72a9de2c3f21161e36
+[done]: https://hrzn.ee/kivikakk/kalaturg/commit/9d704aa2968ab3d287fe23ccfad2bdf26a88d5e3
