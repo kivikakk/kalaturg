@@ -9,4 +9,6 @@
 #define REJOINER(x, y) JOINER(x, y)
 #define CLOCK_WIRE REJOINER(p_, CLOCK_NAME)
 
+#define CLOCK_HZ 3000000
+
 #endif

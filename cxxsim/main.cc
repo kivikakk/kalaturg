@@ -12,9 +12,10 @@
 using namespace cxxrtl_design;
 
 static int bench(p_top &top, cxxrtl::vcd_writer &vcd);
-static void cycle(p_top &top, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time);
+static void cycle(p_top &top, UART &uart, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time);
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   int ret = 0;
 
   p_top top;
@@ -36,50 +37,45 @@ int main(int argc, char **argv) {
   return ret;
 }
 
-static int bench(p_top &top, cxxrtl::vcd_writer &vcd) {
+static int bench(p_top &top, cxxrtl::vcd_writer &vcd)
+{
   uint64_t vcd_time = 0;
   srand(time(0));
 
-  int c = 3e6 / 9600;
-  UART uart(top.p_io__rx, top.p_io__tx);
+  int c = CLOCK_HZ / 9600;
+  UART uart(9600, top.p_io__rx, top.p_io__tx);
 
-  // Hold steady for a bit.
-  top.p_io__rx.set(true);
   for (int i = 0; i < c * 2; ++i) {
-    cycle(top, vcd, vcd_time);
+    cycle(top, uart, vcd, vcd_time);
     if (!top.p_io__tx) {
       std::cerr << "output desserted during init" << std::endl;
       return 1;
     }
   }
 
-  // START bit.
-  top.p_io__rx.set(false);
+  uint8_t input = rand() % 256;
+  std::cout << "input:  ";
+  for (int i = 7; i >= 0; --i)
+    std::cout << (((input >> i) & 1) == 1 ? '1' : '0');
+  std::cout << std::endl;
+
+  uart.transmit(input);
   for (int i = 0; i < c; ++i) {
-    cycle(top, vcd, vcd_time);
+    cycle(top, uart, vcd, vcd_time);
     if (!top.p_io__tx) {
       std::cerr << "output desserted during START" << std::endl;
       return 1;
     }
   }
 
-  bool inp[8];
-  std::cout << "input:  ";
   for (int i = 0; i < 8; ++i) {
-    inp[i] = rand() % 2;
-    std::cout << (inp[i] ? '1' : '0');
-
-    top.p_io__rx.set(inp[i]);
     for (int j = 0; j < c; ++j)
-      cycle(top, vcd, vcd_time);
+      cycle(top, uart, vcd, vcd_time);
   }
-  std::cout << std::endl;
 
-  // Reassert/STOP and wait for their START.
-  top.p_io__rx.set(true);
   bool starting = false;
   for (int i = 0; i < c * 4; ++i) {
-    cycle(top, vcd, vcd_time);
+    cycle(top, uart, vcd, vcd_time);
     if (!top.p_io__tx) {
       starting = true;
       break;
@@ -92,41 +88,43 @@ static int bench(p_top &top, cxxrtl::vcd_writer &vcd) {
 
   // Wait for the rest of the START.
   for (int i = 0; i < c - 1; ++i)
-    cycle(top, vcd, vcd_time);
+    cycle(top, uart, vcd, vcd_time);
 
   // Sample the middle of each bit.
   std::cout << "output: ";
-  bool output[8];
+  uint8_t output = 0;
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < c / 2; ++j)
-      cycle(top, vcd, vcd_time);
-    output[i] = (bool)top.p_io__tx;
-    std::cout << (output[i] ? '1' : '0');
+      cycle(top, uart, vcd, vcd_time);
+    output = (output << 1) | (top.p_io__tx ? 1 : 0);
+    std::cout << (top.p_io__tx ? '1' : '0');
     for (int j = 0; j < c - (c / 2); ++j)
-      cycle(top, vcd, vcd_time);
+      cycle(top, uart, vcd, vcd_time);
   }
   std::cout << std::endl;
 
   // STOP bit and then make sure it stays that way.
   for (int i = 0; i < c * 4; ++i) {
-    cycle(top, vcd, vcd_time);
+    cycle(top, uart, vcd, vcd_time);
     if (!top.p_io__tx) {
       std::cerr << "no STOP bit" << std::endl;
       return 1;
     }
   }
 
-  for (int i = 0; i < 8; ++i) {
-    if (output[i] != inp[i]) {
-      std::cerr << "output differed from input at bit " << i << std::endl;
-      return 1;
-    }
+  if (output != input) {
+    std::cerr << "output differed from input" << std::endl;
+    return 1;
   }
 
   return 0;
 }
 
-static void cycle(p_top &top, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time) {
+static void cycle(p_top &top, UART &uart, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time)
+{
+  // XXX: here or after?
+  uart.cycle();
+
   assert(!top.CLOCK_WIRE);
   top.CLOCK_WIRE.set(true);
   top.step();
