@@ -6,6 +6,6 @@ module top(
   output io_tx
 );
 
-  assign io_tx = io_rx;
+  assign io_tx = 1'h1;
 endmodule
 

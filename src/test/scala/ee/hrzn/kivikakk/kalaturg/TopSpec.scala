@@ -2,37 +2,33 @@ package ee.hrzn.kivikakk.kalaturg
 
 import chisel3._
 import chisel3.experimental.BundleLiterals._
-import chisel3.simulator.EphemeralSimulator._
-import org.scalatest.freespec.AnyFreeSpec
+import chiseltest._
+import chiseltest.simulator.WriteVcdAnnotation
+import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 
-class TopSpec extends AnyFreeSpec with Matchers {
-  "r should equal x^y combinationally" in {
-    simulate(new Top()) { dut =>
-      for { x <- 0 to 1; y <- 0 to 1 } {
-        dut.io.x.poke(x)
-        dut.io.y.poke(y)
-        dut.io.r.expect(x ^ y)
-      }
-    }
-  }
+class TopSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+  behavior.of("Top")
 
-  "s should equal x^y synchronously" in {
-    simulate(new Top()) { dut =>
-      dut.reset.poke(true.B)
-      dut.clock.step()
-      dut.reset.poke(false.B)
-      dut.clock.step()
+  it should "s should equal x^y synchronously" in {
+    test(new Top(clockHz = 1000)).withAnnotations(Seq(WriteVcdAnnotation)) {
+      c => {
+        c.reset.poke(true.B)
+        c.clock.step()
+        c.reset.poke(false.B)
+        c.clock.step()
 
-      var last = dut.io.s.peekValue().asBigInt
-      assert(last == 0)
-      for { x <- 0 to 1; y <- 0 to 1 } {
-        dut.io.x.poke(x)
-        dut.io.y.poke(y)
-        dut.io.s.expect(last)
-        dut.clock.step()
-        dut.io.s.expect(x ^ y)
-        last = x ^ y
+        for {x <- 0 to 10} {
+          c.clock.step()
+        }
+        c.io.rx.poke(true);
+        for {x <- 0 to 10} {
+          c.clock.step()
+        }
+        c.io.rx.poke(false);
+        for {x <- 0 to 10} {
+          c.clock.step()
+        }
       }
     }
   }

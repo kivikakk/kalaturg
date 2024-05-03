@@ -5,6 +5,8 @@
 /result
 .pdm-build
 
+.DS_Store
+
 .bsp/
 .cache
 .history
@@ -14,5 +16,7 @@ dist/*
 lib_managed/
 project/boot/
 project/plugins/project/
+project/project/target/
 src_managed/
 target/
+test_run_dir/
