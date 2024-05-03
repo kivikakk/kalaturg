@@ -13,8 +13,13 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module {
 
   uart.txIo.data := 0.U
   uart.txIo.en := false.B
+  uart.rxIo.en := false.B
 
-  uart.rxIo.en := 0.U
+  when(uart.rxIo.rdy) {
+    uart.txIo.data := uart.rxIo.data
+    uart.txIo.en := true.B
+    uart.rxIo.en := true.B
+  }
 }
 
 object Top extends App {
@@ -22,6 +27,10 @@ object Top extends App {
     new Top(
       clockHz = 3_000_000, // main.cc assumes this.
     ),
-    firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info")
+    firtoolOpts = Array(
+      "--lowering-options=disallowLocalVariables",
+      "-disable-all-randomization",
+      "-strip-debug-info",
+    )
   )
 }

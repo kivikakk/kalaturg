@@ -27,11 +27,10 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
     object State extends ChiselEnum {
       val sWaitSTART, sWaitFirstHalf, sWaitNextSample, sWaitLastHalf, sAssertSTOP = Value
     }
-
     val state = RegInit(State.sWaitSTART)
 
-    val timerReg = RegInit(0.U(unsignedBitLength(divisor - 1).W))
-    val counterReg = RegInit(0.U(unsignedBitLength(7).W))
+    val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
+    val counterReg = Reg(UInt(unsignedBitLength(7).W))
     val shiftReg = Reg(UInt(8.W))
 
     switch(state) {
@@ -98,6 +97,57 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
 
   class TX extends Module {
     val io = IO(new TXIO)
+    val platIo = IO(Output(Bool()))
+
+    object State extends ChiselEnum {
+      val sIdle, sSTART, sWaitNext, sSTOP = Value
+    }
+    val state = RegInit(State.sIdle)
+
+    val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
+    val counterReg = Reg(UInt(unsignedBitLength(7).W))
+    val shiftReg = Reg(UInt(8.W))
+
+    platIo := true.B
+
+    switch(state) {
+      is(State.sIdle) {
+        when(io.en) {
+          timerReg := 0.U
+          shiftReg := io.data
+          state := State.sSTART
+        }
+      }
+      is(State.sSTART) {
+        // XXX: does this cause an *immediate* switch per Amaranth? I have to assume so
+        // but let's test. (since there's no register in platIo.)
+        platIo := false.B
+        timerReg := timerReg + 1.U
+        when(timerReg === (divisor - 1).U) {
+          timerReg := 0.U
+          counterReg := 0.U
+          state := State.sWaitNext
+        }
+      }
+      is(State.sWaitNext) {
+        platIo := shiftReg(7)
+        timerReg := timerReg + 1.U
+        when(timerReg === (divisor - 1).U) {
+          timerReg := 0.U
+          when(counterReg === 7.U) {
+            state := State.sSTOP
+          }.otherwise {
+            counterReg := counterReg + 1.U
+          }
+        }
+      }
+      is(State.sSTOP) {
+        timerReg := timerReg + 1.U
+        when(timerReg === (divisor - 1).U) {
+          state := State.sIdle
+        }
+      }
+    }
   }
 
   val rxIo = IO(new RXIO)
@@ -108,6 +158,7 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
   rxIo <> rx.io
   platIo.rx <> rx.platIo
 
-  private val outReg = RegInit(true.B)
-  platIo.tx := outReg
+  val tx = Module(new TX)
+  txIo <> tx.io
+  platIo.tx <> tx.platIo
 }
