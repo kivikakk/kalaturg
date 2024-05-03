@@ -1,5 +1,5 @@
-#ifndef UART_HH
-#define UART_HH
+#ifndef UART_H
+#define UART_H
 
 #include <cxxrtl/cxxrtl.h>
 

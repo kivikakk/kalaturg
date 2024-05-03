@@ -4,35 +4,19 @@
 #include <iostream>
 
 #include <cxxrtl/cxxrtl_vcd.h>
-#include <build/kalaturg.h>
+#include <kalaturg.h>
 
-#include "uart.hh"
-
-#ifndef CLOCK_NAME
-#define CLOCK_NAME clk
-#endif
-
-#define JOINER(x, y) x ## y
-#define REJOINER(x, y) JOINER(x, y)
-#define CLOCK_WIRE REJOINER(p_, CLOCK_NAME)
+#include "main.h"
+#include "uart.h"
 
 using namespace cxxrtl_design;
 
-void cycle(p_top &top, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time) {
-  assert(!top.CLOCK_WIRE);
-  top.CLOCK_WIRE.set(true);
-  top.step();
-  vcd.sample(vcd_time++);
-
-  top.CLOCK_WIRE.set(false);
-  top.step();
-  vcd.sample(vcd_time++);
-}
-
-int inner(p_top &top, cxxrtl::vcd_writer &vcd);
+static int bench(p_top &top, cxxrtl::vcd_writer &vcd);
+static void cycle(p_top &top, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time);
 
 int main(int argc, char **argv) {
   int ret = 0;
+
   p_top top;
   debug_items di;
   top.debug_info(&di, nullptr, "top ");
@@ -42,7 +26,7 @@ int main(int argc, char **argv) {
   if (do_vcd)
     vcd.add(di);
 
-  ret = inner(top, vcd);
+  ret = bench(top, vcd);
 
   if (do_vcd) {
     std::ofstream of("cxxsim.vcd");
@@ -52,7 +36,7 @@ int main(int argc, char **argv) {
   return ret;
 }
 
-int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
+static int bench(p_top &top, cxxrtl::vcd_writer &vcd) {
   uint64_t vcd_time = 0;
   srand(time(0));
 
@@ -140,4 +124,15 @@ int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
   }
 
   return 0;
+}
+
+static void cycle(p_top &top, cxxrtl::vcd_writer &vcd, uint64_t &vcd_time) {
+  assert(!top.CLOCK_WIRE);
+  top.CLOCK_WIRE.set(true);
+  top.step();
+  vcd.sample(vcd_time++);
+
+  top.CLOCK_WIRE.set(false);
+  top.step();
+  vcd.sample(vcd_time++);
 }
