@@ -6,14 +6,15 @@ import _root_.circt.stage.ChiselStage
 class Top(val baud: Int = 9600, val clockHz: Int) extends Module {
   override def desiredName = "top"
 
-  val io = IO(new Bundle {
-    val rx = Input(Bool())
-    val tx = Output(Bool())
-  })
+  val io = IO(new PlatUART)
 
-  io.tx := io.rx
+  private val uart = Module(new UART(baud=baud, clockHz=clockHz))
+  io <> uart.platIo
 
-  // private val uart = new UART(baud=baud, clockHz=clockHz)
+  uart.io.wrData := 0.U
+  uart.io.wrEn := false.B
+
+  uart.io.rdEn := 0.U
 }
 
 object Top extends App {
