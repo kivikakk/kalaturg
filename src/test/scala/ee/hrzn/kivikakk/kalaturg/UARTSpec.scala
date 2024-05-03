@@ -12,12 +12,6 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   it should "receive a byte" in {
     test(new UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
       c.platIo.rx.poke(true.B)
-
-      c.reset.poke(true.B)
-      c.clock.step()
-      c.reset.poke(false.B)
-      c.clock.step()
-
       c.rxIo.rdy.expect(false.B)
 
       // Assert START and hold for one bit.
@@ -45,6 +39,35 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.rxIo.en.poke(true.B)
       c.clock.step()
       c.rxIo.rdy.expect(false.B)
+    })
+  }
+
+  it should "transmit a byte" in {
+    test(new UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+      c.platIo.tx.expect(true.B)
+
+      // Generate a byte and request it to be sent.
+      val input = (new scala.util.Random).nextInt(256)
+      c.txIo.data.poke(input.U)
+      c.txIo.en.poke(true.B)
+
+      // Watch START.
+      for { i <- 0 until 5 } {
+        c.clock.step()
+        c.platIo.tx.expect(false.B)
+      }
+
+      // Check for each bit in turn.
+      for { bitIx <- 7 to 0 by -1; i <- 0 until 5 } {
+        c.clock.step()
+        c.platIo.tx.expect(((input & (1 << bitIx)) != 0).B)
+      }
+
+      // Watch STOP.
+      for { i <- 0 until 5 } {
+        c.clock.step()
+        c.platIo.tx.expect(true.B)
+      }
     })
   }
 }

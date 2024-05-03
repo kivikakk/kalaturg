@@ -119,8 +119,6 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
         }
       }
       is(State.sSTART) {
-        // XXX: does this cause an *immediate* switch per Amaranth? I have to assume so
-        // but let's test. (since there's no register in platIo.)
         platIo := false.B
         timerReg := timerReg + 1.U
         when(timerReg === (divisor - 1).U) {
@@ -138,6 +136,7 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
             state := State.sSTOP
           }.otherwise {
             counterReg := counterReg + 1.U
+            shiftReg := shiftReg(6, 0) ## 0.U(1.W)
           }
         }
       }

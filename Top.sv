@@ -111,24 +111,31 @@ module TX(
      {_GEN_2 ? 9'h0 : timerReg + 9'h1},
      {_GEN_2 ? 9'h0 : timerReg + 9'h1},
      {io_en ? 9'h0 : timerReg}};
+  wire            _GEN_5 = _GEN_1 & _GEN_2;
   always @(posedge clock) begin
     if (reset)
       state <= 2'h0;
     else
       state <= _GEN_3[state];
     timerReg <= _GEN_4[state];
-    if (~_GEN) begin
+    if (_GEN) begin
+      if (io_en)
+        shiftReg <= io_data;
+    end
+    else begin
       if (_GEN_0) begin
         if (_GEN_2)
           counterReg <= 3'h0;
       end
-      else if (~(_GEN_1 & _GEN_2) | (&counterReg)) begin
+      else if (~_GEN_5 | (&counterReg)) begin
       end
       else
         counterReg <= counterReg + 3'h1;
+      if (_GEN_0 | ~_GEN_5 | (&counterReg)) begin
+      end
+      else
+        shiftReg <= {shiftReg[6:0], 1'h0};
     end
-    if (_GEN & io_en)
-      shiftReg <= io_data;
   end // always @(posedge)
   assign platIo = _GEN | ~_GEN_0 & (~_GEN_1 | shiftReg[7]);
 endmodule
