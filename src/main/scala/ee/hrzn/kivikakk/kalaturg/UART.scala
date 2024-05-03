@@ -74,7 +74,7 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
         }
       }
       is(State.sAssertSTOP) {
-        // TODO: we don't actually assert!
+        // TODO: we don't actually assert! We have no error reporting.
         timerReg := timerReg + 1.U
         when(timerReg === (divisor - 1).U) {
           timerReg := 0.U

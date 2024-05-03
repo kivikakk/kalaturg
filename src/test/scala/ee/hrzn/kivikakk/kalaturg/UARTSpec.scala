@@ -1,7 +1,6 @@
 package ee.hrzn.kivikakk.kalaturg
 
 import chisel3._
-import chisel3.experimental.BundleLiterals._
 import chiseltest._
 import chiseltest.simulator.WriteVcdAnnotation
 import org.scalatest.flatspec.AnyFlatSpec
@@ -27,7 +26,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
 
       // Generate a byte and play it out. Ensure we remain not `rdy`.
       val input = (new scala.util.Random).nextInt(256)
-      for (bitIx <- 0 until 8) {
+      for (bitIx <- 7 to 0 by -1) {
         c.rxIo.rdy.expect(false.B)
         c.platIo.rx.poke(((input & (1 << bitIx)) != 0).B)
         c.clock.step(5)
