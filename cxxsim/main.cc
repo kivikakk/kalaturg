@@ -4,7 +4,9 @@
 #include <iostream>
 
 #include <cxxrtl/cxxrtl_vcd.h>
-#include <build/kalaturg.cc>
+#include <build/kalaturg.h>
+
+#include "uart.hh"
 
 #ifndef CLOCK_NAME
 #define CLOCK_NAME clk
@@ -55,6 +57,7 @@ int inner(p_top &top, cxxrtl::vcd_writer &vcd) {
   srand(time(0));
 
   int c = 3e6 / 9600;
+  UART uart(top.p_io__rx, top.p_io__tx);
 
   // Hold steady for a bit.
   top.p_io__rx.set(true);

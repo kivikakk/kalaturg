@@ -94,11 +94,11 @@
         "yosys": "yosys"
       },
       "locked": {
-        "lastModified": 1714226340,
-        "narHash": "sha256-d/Op2r6ggR3VhFwrNzmqE2pnCEwDKlissPHMzBdhivs=",
+        "lastModified": 1714749668,
+        "narHash": "sha256-nEUy0xGxaOFvfRRn5s2xlAmWqP8Lw67h7TuytwCDl8s=",
         "ref": "refs/heads/main",
-        "rev": "d52075e49ac05a7297b8ed8cd6cdd8a2808e72b0",
-        "revCount": 146,
+        "rev": "24cf967a2b1545ef6b67486b4926629faeaf7749",
+        "revCount": 148,
         "type": "git",
         "url": "https://hrzn.ee/kivikakk/hdx"
       },
