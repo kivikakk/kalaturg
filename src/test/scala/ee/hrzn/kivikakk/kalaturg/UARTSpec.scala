@@ -37,8 +37,14 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.platIo.rx.poke(true.B)
       c.clock.step(5)
 
+      // Check received OK.
       c.rxIo.rdy.expect(true.B)
       c.rxIo.data.expect(input)
+
+      // Ensure we can move to the next byte. (TODO: actually have a FIFO.)
+      c.rxIo.en.poke(true.B)
+      c.clock.step()
+      c.rxIo.rdy.expect(false.B)
     })
   }
 }

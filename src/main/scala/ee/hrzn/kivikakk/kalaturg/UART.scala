@@ -85,6 +85,10 @@ class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
         }
       }
     }
+
+    when(io.en) {
+      rdyReg := false.B
+    }
   }
 
   class TXIO extends Bundle {
