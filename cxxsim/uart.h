@@ -1,6 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
+#include <queue>
+
 #include <cxxrtl/cxxrtl.h>
 
 class UART
@@ -19,7 +21,7 @@ public:
   void cycle();
   unsigned int divisor() const;
 
-  void tx_send(uint8_t byte);
+  void tx_queue(uint8_t byte);
 
   void rx_expect();
   enum rx_state_t rx_state() const;
@@ -38,6 +40,7 @@ private:
   unsigned int _tx_timer;
   unsigned char _tx_counter;
   uint8_t _tx_sr;
+  std::queue<uint8_t> _tx_queue;
 
   cxxrtl::value<1> &_rx_wire;
   enum rx_state_t _rx_state;

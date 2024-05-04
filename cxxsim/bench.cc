@@ -26,13 +26,17 @@ int Bench::run()
   for (int i = 0; i < d * 2; ++i)
     cycle();
 
-  uint8_t input = dist(mt);
-  std::cout << "input:  ";
-  for (int i = 7; i >= 0; --i)
-    std::cout << ((input >> i) & 1 ? '1' : '0');
-  std::cout << std::endl;
+  std::queue<uint8_t> inputs;
+  for (int i = 0; i < 3; ++i) {
+    uint8_t input = dist(mt);
+    std::cout << "input:  ";
+    for (int j = 7; j >= 0; --j)
+      std::cout << ((input >> j) & 1 ? '1' : '0');
+    std::cout << std::endl;
 
-  _uart.tx_send(input);
+    _uart.tx_queue(input);
+    inputs.push(input);
+  }
 
   // START + 8 bits.
   for (int i = 0; i < 9 * d; ++i)
@@ -68,10 +72,11 @@ int Bench::run()
     std::cout << ((output >> i) & 1 ? '1' : '0');
   std::cout << std::endl;
 
-  simassert(output == input, "output differed from input");
+  simassert(output == inputs.front(), "output differed from input");
+  inputs.pop();
 
   // Ensure nothing else happens.
-  for (int i = 0; i < d * 2; ++i)
+  for (int i = 0; i < d * 4; ++i)
     cycle();
 
   return 0;

@@ -41,8 +41,13 @@ void UART::cycle()
       }
       break;
     case tx_stop:
-      if (--_tx_timer == 0)
+      if (--_tx_timer == 0) {
         _tx_state = tx_idle;
+        if (!_tx_queue.empty()) {
+          tx_queue(_tx_queue.front());
+          _tx_queue.pop();
+        }
+      }
       break;
   }
 
@@ -92,14 +97,16 @@ unsigned int UART::divisor() const
   return _divisor;
 }
 
-void UART::tx_send(uint8_t byte)
+void UART::tx_queue(uint8_t byte)
 {
-  simassert(_tx_state == tx_idle, "transmit when tx not idle");
-
-  _tx_wire.set(false);
-  _tx_state = tx_start;
-  _tx_timer = _divisor;
-  _tx_sr = byte;
+  if (_tx_state == tx_idle) {
+    _tx_wire.set(false);
+    _tx_state = tx_start;
+    _tx_timer = _divisor;
+    _tx_sr = byte;
+  } else {
+    _tx_queue.push(byte);
+  }
 }
 
 void UART::rx_expect()
