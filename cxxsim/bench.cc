@@ -10,6 +10,14 @@ Bench::Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd):
   _vcd_time(0)
 {}
 
+struct eight_bit_byte { uint8_t byte; };
+std::ostream &operator <<(std::ostream &os, const eight_bit_byte &ebb)
+{
+  for (int j = 7; j >= 0; --j)
+    os << ((ebb.byte >> j) & 1 ? '1' : '0');
+  return os;
+}
+
 int Bench::run()
 {
   std::random_device rd;
@@ -27,13 +35,9 @@ int Bench::run()
     cycle();
 
   std::queue<uint8_t> inputs;
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 6; ++i) {
     uint8_t input = dist(mt);
-    std::cout << "input:  ";
-    for (int j = 7; j >= 0; --j)
-      std::cout << ((input >> j) & 1 ? '1' : '0');
-    std::cout << std::endl;
-
+    std::cout << "input:  " << eight_bit_byte{input} << std::endl;
     _uart.tx_queue(input);
     inputs.push(input);
   }
@@ -43,7 +47,7 @@ int Bench::run()
     cycle();
 
   _uart.rx_expect();
-  
+
   // Wait some time for START.  d*4 is arbitrary; depends how long the other end
   // takes.  (At least d*1 is needed assuming the other end waits for our STOP.)
   for (int i = 0; i < d * 4 && _uart.rx_state() == UART::rx_expecting; ++i)
@@ -57,7 +61,7 @@ int Bench::run()
   simassert(_uart.rx_state() == UART::rx_bit, "didn't transition from START");
 
   // Wait for all eight bits and STOP.
-  for (int i = 0; i < d * 11; ++i)
+  for (int i = 0; i < d * 9; ++i)
     cycle();
 
   simassert(_uart.rx_state() == UART::rx_idle, "rx still busy?");
@@ -66,14 +70,29 @@ int Bench::run()
   simassert(maybe_output.has_value(), "rx empty");
   uint8_t output = *maybe_output;
 
-  // Sample the middle of each bit.
-  std::cout << "output: ";
-  for (int i = 7; i >= 0; --i)
-    std::cout << ((output >> i) & 1 ? '1' : '0');
-  std::cout << std::endl;
-
+  std::cout << "output: " << eight_bit_byte{output} << std::endl;
   simassert(output == inputs.front(), "output differed from input");
   inputs.pop();
+
+  // Run through the rest.
+  while (!inputs.empty()) {
+    _uart.rx_expect();
+    for (int i = 0; i < d * 4 && _uart.rx_state() == UART::rx_expecting; ++i)
+      cycle();
+    simassert(_uart.rx_state() == UART::rx_start, "didn't get START");
+
+    for (int i = 0; i < d * 14 && _uart.rx_state() != UART::rx_idle; ++i)
+      cycle();
+    simassert(_uart.rx_state() == UART::rx_idle, "didn't return to idle");
+
+    auto maybe_output = _uart.rx_read();
+    simassert(maybe_output.has_value(), "rx empty");
+    uint8_t output = *maybe_output;
+
+    std::cout << "output: " << eight_bit_byte{output} << std::endl;
+    simassert(output == inputs.front(), "output differed from input");
+    inputs.pop();
+  }
 
   // Ensure nothing else happens.
   for (int i = 0; i < d * 4; ++i)

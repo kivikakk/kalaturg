@@ -67,6 +67,7 @@ void UART::cycle()
       if (--_rx_timer == 0) {
         _rx_state = rx_bit;
         _rx_timer = _divisor;
+        _rx_counter = 0;
         _rx_sr = 0;
       }
       break;
