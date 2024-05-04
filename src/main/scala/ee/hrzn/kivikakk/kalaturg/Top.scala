@@ -10,17 +10,17 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module {
 
   val io = IO(new PlatIO)
 
-  private val uart = Module(new UART(baud=baud, clockHz=clockHz))
+  val uart = Module(new UART(baud=baud, clockHz=clockHz))
   io <> uart.platIo
 
-  uart.txIo.data := 0.U
-  uart.txIo.en := false.B
-  uart.rxIo.en := false.B
+  uart.txIo.bits := 0.U
+  uart.txIo.valid := false.B
+  uart.rxIo.ready := false.B
 
-  when(uart.rxIo.rdy) {
-    uart.txIo.data := uart.rxIo.data
-    uart.txIo.en := true.B
-    uart.rxIo.en := true.B
+  when(uart.rxIo.valid) {
+    uart.txIo.bits := uart.rxIo.bits
+    uart.txIo.valid := true.B
+    uart.rxIo.ready := true.B
   }
 }
 

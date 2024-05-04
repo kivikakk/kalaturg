@@ -3,31 +3,28 @@ package ee.hrzn.kivikakk.kalaturg.uart
 import chisel3._
 import chisel3.util._
 
-class TX(private val divisor: Int) extends Module {
-  class TXIO extends Bundle {
-    val data = Input(UInt(8.W))
-    val en = Input(Bool())
-  }
-
-  val io = IO(new TXIO)
+class TX(val divisor: Int) extends Module {
+  val io = IO(Flipped(Decoupled(UInt(8.W))))
   val platIo = IO(Output(Bool()))
 
   object State extends ChiselEnum {
     val sIdle, sSTART, sWaitNext, sSTOP = Value
   }
-  val state = RegInit(State.sIdle)
+  private val state = RegInit(State.sIdle)
 
-  val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
-  val counterReg = Reg(UInt(unsignedBitLength(7).W))
-  val shiftReg = Reg(UInt(8.W))
+  private val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
+  private val counterReg = Reg(UInt(unsignedBitLength(7).W))
+  private val shiftReg = Reg(UInt(8.W))
 
   platIo := true.B
+  io.ready := false.B
 
   switch(state) {
     is(State.sIdle) {
-      when(io.en) {
+      when(io.valid) {
         timerReg := 0.U
-        shiftReg := io.data
+        shiftReg := io.bits
+        io.ready := true.B
         state := State.sSTART
       }
     }

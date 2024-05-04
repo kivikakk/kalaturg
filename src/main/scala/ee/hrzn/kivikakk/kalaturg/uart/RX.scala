@@ -4,28 +4,26 @@ import chisel3._
 import chisel3.util._
 
 class RX(private val divisor: Int) extends Module {
-  class RXIO extends Bundle {
-    val rdy = Output(Bool())
-    val en = Input(Bool())
-    val data = Output(UInt(8.W))
-  }
-
-  val io = IO(new RXIO)
+  val io = IO(Decoupled(UInt(8.W)))
   val platIo = IO(Input(Bool()))
 
-  val rdyReg = RegInit(false.B)
-  val dataReg = RegInit(0.U(8.W))
-  io.rdy := rdyReg
-  io.data := dataReg
+  private val validReg = RegInit(false.B)
+  io.valid <> validReg
+  private val bitsReg = RegInit(0.U(8.W))
+  io.bits <> bitsReg
 
   object State extends ChiselEnum {
     val sWaitSTART, sWaitFirstHalf, sWaitNextSample, sWaitLastHalf, sAssertSTOP = Value
   }
-  val state = RegInit(State.sWaitSTART)
+  private val state = RegInit(State.sWaitSTART)
 
-  val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
-  val counterReg = Reg(UInt(unsignedBitLength(7).W))
-  val shiftReg = Reg(UInt(8.W))
+  private val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
+  private val counterReg = Reg(UInt(unsignedBitLength(7).W))
+  private val shiftReg = Reg(UInt(8.W))
+
+  when (io.ready) {
+    validReg := false.B
+  }
 
   switch(state) {
     is(State.sWaitSTART) {
@@ -73,13 +71,11 @@ class RX(private val divisor: Int) extends Module {
         timerReg := 0.U
         state := State.sWaitSTART
 
-        rdyReg := true.B
-        dataReg := shiftReg
+        when(io.ready) {
+          validReg := true.B
+          bitsReg := shiftReg
+        }
       }
     }
-  }
-
-  when(io.en) {
-    rdyReg := false.B
   }
 }
