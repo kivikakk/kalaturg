@@ -4,78 +4,70 @@ import chisel3._
 import chisel3.util._
 
 class RX(private val divisor: Int) extends Module {
-  val io = IO(Decoupled(UInt(8.W)))
+  class Output extends Bundle {
+    val byte = UInt(8.W)
+    val err = Bool()
+  }
+  val io = IO(Decoupled(new Output))
   val platIo = IO(Input(Bool()))
 
+  private val syncedPlatIo = RegNext(RegNext(platIo, true.B), true.B)
+
   private val validReg = RegInit(false.B)
-  io.valid <> validReg
-  private val bitsReg = RegInit(0.U(8.W))
-  io.bits <> bitsReg
+  io.valid := validReg
+  private val bitsReg = Reg(new Output)
+  io.bits := bitsReg
 
   object State extends ChiselEnum {
-    val sWaitSTART, sWaitFirstHalf, sWaitNextSample, sWaitLastHalf, sAssertSTOP = Value
+    val sIdle, sRx, sFinish = Value
   }
-  private val state = RegInit(State.sWaitSTART)
+  private val state = RegInit(State.sIdle)
 
   private val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
-  private val counterReg = Reg(UInt(unsignedBitLength(7).W))
-  private val shiftReg = Reg(UInt(8.W))
+  private val counterReg = Reg(UInt(unsignedBitLength(9).W))
+  private val shiftReg = Reg(UInt(10.W))
 
-  when (io.ready) {
+  // |_s_|_1_|_2_|_3_|_4_|_5_|_6_|_7_|_8_|_S_|_!
+  // ^-- counterReg := 9, state := sRx
+  //   ^-- timer hits 0 for the first time, counterReg 9->8
+  //       ^-- timer hits 0, counterReg 8->7
+  //                                       ^-- 1->0
+  //                                           ^-- 0->-1. We finish here, a little late?
+  // Is that better or worse than finishing right on time?
+
+  // Reset valid when "consumed".
+  when(io.ready) {
     validReg := false.B
   }
 
   switch(state) {
-    is(State.sWaitSTART) {
-      timerReg := 0.U
-      when(!platIo) {
-        when(timerReg === (divisor - 1).U) {
-          state := State.sWaitFirstHalf
-        }.otherwise {
-          timerReg := timerReg + 1.U
-        }
+    is(State.sIdle) {
+      when(!syncedPlatIo) {
+        timerReg := (divisor >> 1).U
+        counterReg := 9.U
+        state := State.sRx
       }
     }
-    is(State.sWaitFirstHalf) {
-      timerReg := timerReg + 1.U
-      when(timerReg === ((divisor / 2) - 1).U) {
-        timerReg := 0.U
-        counterReg := 1.U
-        shiftReg := shiftReg(6, 0) ## platIo
-        state := State.sWaitNextSample
-      }
-    }
-    is(State.sWaitNextSample) {
-      timerReg := timerReg + 1.U
-      when(timerReg === (divisor - 1).U) {
-        timerReg := 0.U
-        shiftReg := shiftReg(6, 0) ## platIo
-        when(counterReg === 7.U) {
-          state := State.sWaitLastHalf
-        }.otherwise {
-          counterReg := counterReg + 1.U
-        }
-      }
-    }
-    is(State.sWaitLastHalf) {
-      timerReg := timerReg + 1.U
-      when(timerReg === ((divisor - (divisor / 2)) - 1).U) {
-        timerReg := 0.U
-        state := State.sAssertSTOP
-      }
-    }
-    is(State.sAssertSTOP) {
-      // TODO: we don't actually assert! We have no error reporting.
-      timerReg := timerReg + 1.U
-      when(timerReg === (divisor - 1).U) {
-        timerReg := 0.U
-        state := State.sWaitSTART
+    is(State.sRx) {
+      timerReg := timerReg - 1.U
+      when(timerReg === 0.U) {
+        timerReg := (divisor - 1).U
+        counterReg := counterReg - 1.U
+        shiftReg := shiftReg(8, 0) ## syncedPlatIo
 
-        when(io.ready) {
-          validReg := true.B
-          bitsReg := shiftReg
+        when(counterReg === 0.U) {
+          state := State.sFinish
         }
       }
+    }
+    is(State.sFinish) {
+      when(io.ready) {
+        validReg := true.B
+        bitsReg.byte := shiftReg(8, 1)
+        // START high or STOP low.
+        bitsReg.err := shiftReg(9) | ~shiftReg(0)
+      }
+      state := State.sIdle
     }
   }
 }
