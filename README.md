@@ -46,12 +46,15 @@ Done so far:
   it'll be very *wrong*, but the key is the integration.
 * [Write a little unbuffered UART pair, test them, integrate. **Done.**][done]
 * Extend the test case to exercise the Amaranth version's buffers on TX/RX.
+* ~~Write a FIFO in Chisel and buffer the TX/RX.~~
+* Discover `Queue` and learn how to use `Decoupled` -- use that in RX and TX.
 
 WIP/todo:
 
-* Write a FIFO in Chisel and buffer the TX/RX.
+* Redo the base UART module using `Queue`.
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
-  it driving everything through lines from the top. Amaranth, then Chisel.
+  it driving everything through lines from the top. Get it working first with
+  Amaranth, then Chisel.
 
 [hdx]: https://hrzn.ee/kivikakk/hdx
 [pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
