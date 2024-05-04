@@ -10,7 +10,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   behavior.of("UART")
 
   it should "receive a byte" in {
-    test(new UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new uart.UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
       c.platIo.rx.poke(true.B)
       c.rxIo.rdy.expect(false.B)
 
@@ -43,7 +43,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   }
 
   it should "transmit a byte" in {
-    test(new UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new uart.UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
       c.platIo.tx.expect(true.B)
 
       // Generate a byte and request it to be sent.
