@@ -8,12 +8,23 @@ class UART
 public:
   UART(unsigned int baud, cxxrtl::value<1> &tx_wire, cxxrtl::value<1> &rx_wire);
 
+  enum rx_state_t {
+    rx_idle,
+    rx_expecting,
+    rx_start,
+    rx_bit,
+    rx_stop,
+  };
+
   void cycle();
-  void transmit(uint8_t byte);
-  void expect(uint8_t byte);
+  unsigned int divisor() const;
 
-  bool rx_busy() const;
+  void tx_send(uint8_t byte);
 
+  void rx_expect();
+  enum rx_state_t rx_state() const;
+  std::optional<uint8_t> rx_read();
+  
 private:
   const unsigned int _divisor;
 
@@ -25,16 +36,15 @@ private:
     tx_stop,
   } _tx_state;
   unsigned int _tx_timer;
-  unsigned short _tx_counter;
+  unsigned char _tx_counter;
   uint8_t _tx_sr;
 
   cxxrtl::value<1> &_rx_wire;
-  enum rx_state_t {
-    rx_idle,
-    rx_expecting_start,
-    rx_start,
-  } _rx_state;
-  uint8_t _rx_expected;
+  enum rx_state_t _rx_state;
+  unsigned int _rx_timer;
+  unsigned char _rx_counter;
+  uint8_t _rx_sr;
+  std::optional<uint8_t> _rx_buffer;
 };
 
 #endif

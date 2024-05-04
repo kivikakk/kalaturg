@@ -32,8 +32,8 @@ private:
   cxxrtl_design::p_top &_top;
   UART _uart;
 
-  uint64_t _vcd_time;
   cxxrtl::vcd_writer &_vcd;
+  uint64_t _vcd_time;
 };
 
 #endif

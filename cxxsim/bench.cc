@@ -1,3 +1,5 @@
+#include <random>
+
 #include "bench.h"
 #include "simassert.h"
 
@@ -10,62 +12,67 @@ Bench::Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd):
 
 int Bench::run()
 {
-  int c = CLOCK_HZ / 9600;
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<uint8_t> dist(0, 255);
 
+  unsigned int d = _uart.divisor();
+  std::cout << "divisor: " << d << std::endl;
+
+  step();
   step();
 
   // Check we remain stable for a while.
-  for (int i = 0; i < c * 2; ++i)
+  for (int i = 0; i < d * 2; ++i)
     cycle();
 
-  uint8_t input = rand() % 256;
+  uint8_t input = dist(mt);
   std::cout << "input:  ";
   for (int i = 7; i >= 0; --i)
-    std::cout << (((input >> i) & 1) == 1 ? '1' : '0');
+    std::cout << ((input >> i) & 1 ? '1' : '0');
   std::cout << std::endl;
 
-  _uart.transmit(input);
+  _uart.tx_send(input);
 
   // START + 8 bits.
-  for (int i = 0; i < 9 * c; ++i)
+  for (int i = 0; i < 9 * d; ++i)
     cycle();
 
-  _uart.expect(input);
+  _uart.rx_expect();
   
-  for (int i = 0; i < c * 4 && !_uart.rx_busy(); ++i)
+  // Wait some time for START.  d*4 is arbitrary; depends how long the other end
+  // takes.  (At least d*1 is needed assuming the other end waits for our STOP.)
+  for (int i = 0; i < d * 4 && _uart.rx_state() == UART::rx_expecting; ++i)
     cycle();
-  simassert(_uart.rx_busy(), "didn't get START");
+  simassert(_uart.rx_state() == UART::rx_start, "didn't get START");
 
   // Wait for the rest of the START.
-  for (int i = 0; i < c - 1; ++i)
+  for (int i = 0; i < d - 1; ++i)
     cycle();
+
+  simassert(_uart.rx_state() == UART::rx_bit, "didn't transition from START");
+
+  // Wait for all eight bits and STOP.
+  for (int i = 0; i < d * 11; ++i)
+    cycle();
+
+  simassert(_uart.rx_state() == UART::rx_idle, "rx still busy?");
+
+  auto maybe_output = _uart.rx_read();
+  simassert(maybe_output.has_value(), "rx empty");
+  uint8_t output = *maybe_output;
 
   // Sample the middle of each bit.
   std::cout << "output: ";
-  uint8_t output = 0;
-  for (int i = 0; i < 8; ++i) {
-    for (int j = 0; j < c / 2; ++j)
-      cycle();
-    output = (output << 1) | (_top.p_io__tx ? 1 : 0);
-    std::cout << (_top.p_io__tx ? '1' : '0');
-    for (int j = 0; j < c - (c / 2); ++j)
-      cycle();
-  }
+  for (int i = 7; i >= 0; --i)
+    std::cout << ((output >> i) & 1 ? '1' : '0');
   std::cout << std::endl;
 
-  // STOP bit and then make sure it stays that way.
-  for (int i = 0; i < c * 4; ++i) {
-    cycle();
-    if (!_top.p_io__tx) {
-      std::cerr << "no STOP bit" << std::endl;
-      return 1;
-    }
-  }
+  simassert(output == input, "output differed from input");
 
-  if (output != input) {
-    std::cerr << "output differed from input" << std::endl;
-    return 1;
-  }
+  // Ensure nothing else happens.
+  for (int i = 0; i < d * 2; ++i)
+    cycle();
 
   return 0;
 }

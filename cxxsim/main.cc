@@ -1,5 +1,3 @@
-#include <cstdlib>
-#include <ctime>
 #include <fstream>
 #include <iostream>
 
@@ -11,9 +9,6 @@
 
 int main(int argc, char **argv)
 {
-  int ret = 0;
-  srand(time(0));
-
   cxxrtl_design::p_top top;
   debug_items di;
   top.debug_info(&di, nullptr, "top ");
@@ -24,6 +19,7 @@ int main(int argc, char **argv)
     vcd.add(di);
 
   Bench bench(top, vcd);
+  int ret = -1;
   try {
     ret = bench.run();
   } catch (assertion_error &e) {
