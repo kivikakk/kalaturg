@@ -45,10 +45,10 @@ Done so far:
 * Build the Chisel module with CXXRTL and integrate it into the simulator —
   it'll be very *wrong*, but the key is the integration.
 * [Write a little unbuffered UART pair, test them, integrate. **Done.**][done]
+* Extend the test case to exercise the Amaranth version's buffers on TX/RX.
 
 WIP/todo:
 
-* Extend the test case to exercise the Amaranth version's buffers on TX/RX.
 * Write a FIFO in Chisel and buffer the TX/RX.
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
   it driving everything through lines from the top. Amaranth, then Chisel.
