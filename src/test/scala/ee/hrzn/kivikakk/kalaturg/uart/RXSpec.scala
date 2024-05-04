@@ -21,7 +21,8 @@ class RXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.clock.step()
     }
 
-    // Wait to get into sFinish, accounting for the synchronisation delay.
+    // Wait to get into sFinish, accounting for the synchronisation delay and
+    // extra time from finishing 'late'.
     for { i <- 0 until 3 } {
       c.io.valid.expect(false.B)
       c.clock.step()

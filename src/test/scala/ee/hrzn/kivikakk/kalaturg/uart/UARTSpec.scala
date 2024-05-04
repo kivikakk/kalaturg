@@ -9,6 +9,11 @@ import org.scalatest.matchers.must.Matchers
 class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   behavior.of("UART")
 
+  // TODO: We have our cleaned up RX and TX modules now, and concise specs for
+  //  each. UART now just needs to become the component which manages queueing
+  //  the data in and out, per
+  //  https://hrzn.ee/kivikakk/kalaturg/src/commit/e2d3cff/kalaturg/rtl/uart.py.
+
   it should "receive a byte" in {
     test(new UART(baud = 1, clockHz = 5)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
       c.platIo.rx.poke(true.B)
@@ -32,11 +37,6 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.clock.step(5)
 
       // Check received OK.
-      // TODO: This fails because we now need to hold ack to signal
-      // TODO: we're ready at the moment it becomes available.
-      // TODO: Continue refactoring UART itself like the Python version's
-      // TODO: UART, which itself holds the queue and slurps up data as
-      // TODO: available. Then test that here.
       c.rxIo.valid.expect(true.B)
       c.rxIo.bits.expect(input)
 
