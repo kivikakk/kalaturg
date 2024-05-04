@@ -2,11 +2,13 @@ package ee.hrzn.kivikakk.kalaturg
 
 import chisel3._
 import _root_.circt.stage.ChiselStage
+import ee.hrzn.kivikakk.kalaturg.uart.UART
+import ee.hrzn.kivikakk.kalaturg.uart.PlatIO
 
 class Top(val baud: Int = 9600, val clockHz: Int) extends Module {
   override def desiredName = "top"
 
-  val io = IO(new PlatUART)
+  val io = IO(new PlatIO)
 
   private val uart = Module(new UART(baud=baud, clockHz=clockHz))
   io <> uart.platIo
