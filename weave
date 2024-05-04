@@ -1,25 +1,54 @@
 #!/usr/bin/env fish
 
-fish_add_path /opt/homebrew/opt/llvm/bin
-set CXX clang++
-# set opt -O3
-set opt
+set CXX c++
+set opt -g -Wall -pedantic -Wno-zero-length-array $argv
+# set -a opt -O3
 
 echo "
 read_verilog -sv Top.sv
 write_cxxrtl -header build/kalaturg.cc
 " | yosys -q -
 
+set outfiles
+set errfiles
 
-$CXX $opt \
-    -DCLOCK_NAME=clock \
-    -I. \
-    -I(yosys-config --datdir)/include/backends/cxxrtl/runtime \
-    -c cxxsim/main.cc \
-    -o build/main.o
+for cc in build/kalaturg.cc cxxsim/*.cc
+    set o build/(path change-extension .o (basename $cc))
+    set -a outfiles $o
 
-$CXX $opt \
-    build/main.o \
+    set args \
+        $opt \
+        -DCLOCK_NAME=clock \
+        -Ibuild \
+        -I(yosys-config --datdir)/include/backends/cxxrtl/runtime \
+        -c $cc \
+        -o $o
+    echo $CXX $args
+    $CXX $args &
+
+    set cc$last_pid $cc
+
+    function ended_$last_pid --on-process-exit $last_pid
+        if test $argv[3] != 0
+            set cc cc$argv[2]
+            set -a errfiles $$cc
+        end
+    end
+end
+
+wait
+
+if test (count $errfiles) != 0
+    echo "Failed to build paths:"
+    for f in $errfiles
+        echo "- $f"
+    end
+    exit 1
+end
+
+set args \
+    $opt \
+    $outfiles \
     -o build/cxxsim
-
-
+echo $CXX $args
+$CXX $args
