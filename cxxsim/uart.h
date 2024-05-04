@@ -12,6 +12,8 @@ public:
   void transmit(uint8_t byte);
   void expect(uint8_t byte);
 
+  bool rx_busy() const;
+
 private:
   const unsigned int _divisor;
 
@@ -30,6 +32,7 @@ private:
   enum rx_state_t {
     rx_idle,
     rx_expecting_start,
+    rx_start,
   } _rx_state;
   uint8_t _rx_expected;
 };

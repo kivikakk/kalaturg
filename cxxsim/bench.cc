@@ -12,6 +12,9 @@ int Bench::run()
 {
   int c = CLOCK_HZ / 9600;
 
+  step();
+
+  // Check we remain stable for a while.
   for (int i = 0; i < c * 2; ++i)
     cycle();
 
@@ -29,18 +32,9 @@ int Bench::run()
 
   _uart.expect(input);
   
-  bool starting = false;
-  for (int i = 0; i < c * 4; ++i) {
+  for (int i = 0; i < c * 4 && !_uart.rx_busy(); ++i)
     cycle();
-    if (!_top.p_io__tx) {
-      starting = true;
-      break;
-    }
-  }
-  if (!starting) {
-    std::cerr << "didn't get START" << std::endl;
-    return 1;
-  }
+  simassert(_uart.rx_busy(), "didn't get START");
 
   // Wait for the rest of the START.
   for (int i = 0; i < c - 1; ++i)
@@ -84,8 +78,12 @@ uint64_t Bench::cycle_number() const
 void Bench::cycle()
 {
   _uart.cycle();
+  step();
+}
 
-  simassert(!_top.CLOCK_WIRE, "cycle when clock not low");
+void Bench::step()
+{
+  simassert(!_top.CLOCK_WIRE, "step when clock not low");
   _top.CLOCK_WIRE.set(true);
   _top.step();
   _vcd.sample(_vcd_time++);

@@ -30,12 +30,12 @@ int main(int argc, char **argv)
     std::cerr
       << "got assertion on cycle " << bench.cycle_number() << std::endl
       << e.what() << std::endl;
-
-    if (do_vcd) {
-      std::ofstream of("cxxsim.vcd");
-      of << vcd.buffer;
-    }
     ret = -1;
+  }
+
+  if (do_vcd) {
+    std::ofstream of("cxxsim.vcd");
+    of << vcd.buffer;
   }
 
   return ret;

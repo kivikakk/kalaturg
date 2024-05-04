@@ -27,6 +27,7 @@ public:
 
 private:
   void cycle();
+  void step();
 
   cxxrtl_design::p_top &_top;
   UART _uart;

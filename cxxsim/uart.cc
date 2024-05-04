@@ -49,9 +49,13 @@ void UART::cycle()
   switch (_rx_state)
   {
     case rx_idle:
-      simassert((bool)_rx_wire, "rx went high while (expected) idle");
+      simassert((bool)_rx_wire, "rx went low while (expected) idle");
       break;
     case rx_expecting_start:
+      if (!_rx_wire)
+        _rx_state = rx_start;
+      break;
+    case rx_start:
       break;
   }
 }
@@ -72,4 +76,9 @@ void UART::expect(uint8_t byte)
 
   _rx_state = rx_expecting_start;
   _rx_expected = byte;
+}
+
+bool UART::rx_busy() const
+{
+  return _rx_state != rx_idle && _rx_state != rx_expecting_start;
 }
