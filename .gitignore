@@ -1,11 +1,17 @@
 **/__pypackages__/
 **/__pycache__/
 /build/
-*.vcd
 /result
 .pdm-build
 
 .DS_Store
+
+*.asc
+*.bin
+*.vcd
+*.json
+*.rpt
+*.tim
 
 .bsp/
 .cache
