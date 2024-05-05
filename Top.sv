@@ -346,13 +346,12 @@ module top(
   wire       _uart_rxIo_valid;
   wire [7:0] _uart_rxIo_bits_byte;
   wire       _uart_rxIo_bits_err;
-  wire       _GEN = _uart_txIo_ready & _uart_rxIo_valid & ~_uart_rxIo_bits_err;
   UART uart (
     .clock          (clock),
     .reset          (reset),
     .txIo_ready     (_uart_txIo_ready),
-    .txIo_valid     (_GEN),
-    .txIo_bits      (_GEN ? _uart_rxIo_bits_byte : 8'h0),
+    .txIo_valid     (_uart_txIo_ready & _uart_rxIo_valid & ~_uart_rxIo_bits_err),
+    .txIo_bits      (_uart_rxIo_bits_byte),
     .rxIo_ready     (_uart_txIo_ready),
     .rxIo_valid     (_uart_rxIo_valid),
     .rxIo_bits_byte (_uart_rxIo_bits_byte),

@@ -13,14 +13,9 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module {
   val uart = Module(new UART(baud=baud, clockHz=clockHz))
   io <> uart.platIo
 
-  uart.txIo.bits := 0.U
-  uart.txIo.valid := false.B
+  uart.txIo.bits := uart.rxIo.bits.byte
+  uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
   uart.rxIo.ready := uart.txIo.ready
-
-  when(uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err) {
-    uart.txIo.bits := uart.rxIo.bits.byte
-    uart.txIo.valid := true.B
-  }
 }
 
 object Top extends App {
