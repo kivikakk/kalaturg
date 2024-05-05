@@ -4,18 +4,14 @@ import chisel3._
 import chisel3.util._
 
 class RX(private val divisor: Int) extends Module {
-  class Output extends Bundle {
-    val byte = UInt(8.W)
-    val err = Bool()
-  }
-  val io = IO(Decoupled(new Output))
+  val io = IO(Decoupled(new RXOut))
   val platIo = IO(Input(Bool()))
 
   private val syncedPlatIo = RegNext(RegNext(platIo, true.B), true.B)
 
   private val validReg = RegInit(false.B)
   io.valid := validReg
-  private val bitsReg = Reg(new Output)
+  private val bitsReg = Reg(new RXOut)
   io.bits := bitsReg
 
   object State extends ChiselEnum {

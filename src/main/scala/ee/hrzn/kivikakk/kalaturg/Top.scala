@@ -15,12 +15,11 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module {
 
   uart.txIo.bits := 0.U
   uart.txIo.valid := false.B
-  uart.rxIo.ready := false.B
+  uart.rxIo.ready := uart.txIo.ready
 
-  when(uart.rxIo.valid) {
-    uart.txIo.bits := uart.rxIo.bits
+  when(uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err) {
+    uart.txIo.bits := uart.rxIo.bits.byte
     uart.txIo.valid := true.B
-    uart.rxIo.ready := true.B
   }
 }
 
