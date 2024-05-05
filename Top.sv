@@ -92,11 +92,17 @@ module ram_32x9(
 );
 
   reg [8:0] Memory[0:31];
+  reg       _R0_en_d0;
+  reg [4:0] _R0_addr_d0;
+  always @(posedge R0_clk) begin
+    _R0_en_d0 <= R0_en;
+    _R0_addr_d0 <= R0_addr;
+  end // always @(posedge)
   always @(posedge W0_clk) begin
     if (W0_en & 1'h1)
       Memory[W0_addr] <= W0_data;
   end // always @(posedge)
-  assign R0_data = R0_en ? Memory[R0_addr] : 9'bx;
+  assign R0_data = _R0_en_d0 ? Memory[_R0_addr_d0] : 9'bx;
 endmodule
 
 module Queue32_RXOut(
@@ -137,7 +143,7 @@ module Queue32_RXOut(
     end
   end // always @(posedge)
   ram_32x9 ram_ext (
-    .R0_addr (deq_ptr_value),
+    .R0_addr (do_deq ? ((&deq_ptr_value) ? 5'h0 : deq_ptr_value + 5'h1) : deq_ptr_value),
     .R0_en   (1'h1),
     .R0_clk  (clock),
     .R0_data (_ram_ext_R0_data),
@@ -206,11 +212,17 @@ module ram_32x8(
 );
 
   reg [7:0] Memory[0:31];
+  reg       _R0_en_d0;
+  reg [4:0] _R0_addr_d0;
+  always @(posedge R0_clk) begin
+    _R0_en_d0 <= R0_en;
+    _R0_addr_d0 <= R0_addr;
+  end // always @(posedge)
   always @(posedge W0_clk) begin
     if (W0_en & 1'h1)
       Memory[W0_addr] <= W0_data;
   end // always @(posedge)
-  assign R0_data = R0_en ? Memory[R0_addr] : 8'bx;
+  assign R0_data = _R0_en_d0 ? Memory[_R0_addr_d0] : 8'bx;
 endmodule
 
 module Queue32_UInt8(
@@ -248,7 +260,7 @@ module Queue32_UInt8(
     end
   end // always @(posedge)
   ram_32x8 ram_ext (
-    .R0_addr (deq_ptr_value),
+    .R0_addr (do_deq ? ((&deq_ptr_value) ? 5'h0 : deq_ptr_value + 5'h1) : deq_ptr_value),
     .R0_en   (1'h1),
     .R0_clk  (clock),
     .R0_data (io_deq_bits),
