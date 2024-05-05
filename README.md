@@ -48,10 +48,11 @@ Done so far:
 * Extend the test case to exercise the Amaranth version's buffers on TX/RX.
 * ~~Write a FIFO in Chisel and buffer the TX/RX.~~
 * Discover `Queue` and learn how to use `Decoupled` -- use that in RX and TX.
+* Redo the base UART module using `Queue`.
+* Test it on the iCEBreaker!
 
 WIP/todo:
 
-* Redo the base UART module using `Queue`.
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
   it driving everything through lines from the top. Get it working first with
   Amaranth, then Chisel.
