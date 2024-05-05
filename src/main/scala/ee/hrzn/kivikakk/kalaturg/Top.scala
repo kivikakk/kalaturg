@@ -56,14 +56,12 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
 
   io_ledg := false.B
 
-  io.tx := io.rx
+  val uart = Module(new UART(baud = baud, clockHz = clockHz))
+  io <> uart.platIo
 
-  //  val uart = Module(new UART(baud=baud, clockHz=clockHz))
-  //  io <> uart.platIo
-  //
-  //  uart.txIo.bits := uart.rxIo.bits.byte
-  //  uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
-  //  uart.rxIo.ready := uart.txIo.ready
+  uart.txIo.bits := uart.rxIo.bits.byte
+  uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
+  uart.rxIo.ready := uart.txIo.ready
 }
 
 object Top extends App {
