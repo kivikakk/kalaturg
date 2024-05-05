@@ -37,22 +37,10 @@ class Top(Elaboratable):
 
         m.submodules.uart = uart = UART(plat_uart, baud=self.baud)
 
-        # echo
-        with m.FSM():
-            with m.State('init'):
-                with m.If(uart.rd_rdy):
-                    m.d.sync += [
-                        uart.rd_en.eq(1),
-                        uart.wr_data.eq(uart.rd_data),
-                        uart.wr_en.eq(1),
-                    ]
-                    m.next = 'dessert'
-
-            with m.State('dessert'):
-                m.d.sync += [
-                    uart.rd_en.eq(0),
-                    uart.wr_en.eq(0),
-                ]
-                m.next = 'init'
+        m.d.comb += [
+            uart.wr_data.eq(uart.rd_data),
+            uart.wr_en.eq(uart.rd_rdy),
+            uart.rd_en.eq(uart.rd_rdy),
+        ]
 
         return m
