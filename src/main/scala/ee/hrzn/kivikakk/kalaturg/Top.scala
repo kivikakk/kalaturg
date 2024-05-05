@@ -3,13 +3,10 @@ package ee.hrzn.kivikakk.kalaturg
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
-import ee.hrzn.kivikakk.kalaturg.uart.UART
-import ee.hrzn.kivikakk.kalaturg.uart.PlatIO
 
-/** Notes:
- *
- * - Buttons are LEDs are inverted.
- */
+// Notes:
+// - Buttons and LEDs are inverted.
+// - Gotta supply our own POR!
 
 class Top(private val baud: Int = 9600, private val clockHz: Int) extends RawModule {
   override def desiredName = "top"
@@ -27,25 +24,24 @@ class Top(private val baud: Int = 9600, private val clockHz: Int) extends RawMod
     resetTimerReg := resetTimerReg + 1.U
   }
 
-  val io_ubtn = IO(Input(new Bool()))
+  private val io_ubtn = IO(Input(new Bool()))
 
-  val io = IO(new PlatIO)
-  val io_ledr = IO(Output(new Bool()))
-  val io_ledg = IO(Output(new Bool()))
-
-  val inner = withClockAndReset(clk, reset | ~io_ubtn)(Module(new TopInner(baud, clockHz)))
+  private val inner = withClockAndReset(clk, reset | ~io_ubtn)(Module(new TopInner(baud, clockHz)))
+  private val io = IO(new TopIO)
   io <> inner.io
-  io_ledr <> inner.io_ledr
-  io_ledg <> inner.io_ledg
+}
+
+class TopIO extends Bundle {
+  val plat = new uart.IO
+  val ledr = Output(new Bool())
+  val ledg = Output(new Bool())
 }
 
 class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
-  val io = IO(new PlatIO)
-  val io_ledr = IO(Output(new Bool()))
-  val io_ledg = IO(Output(new Bool()))
+  val io = IO(new TopIO)
 
-  val ledReg = RegInit(true.B)
-  io_ledr := ledReg
+  private val ledReg = RegInit(true.B)
+  io.ledr := ledReg
   val timerReg = RegInit(2999_999.U(unsignedBitLength(5_999_999).W))
   when(timerReg === 0.U) {
     ledReg := ~ledReg
@@ -54,14 +50,14 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
     timerReg := timerReg - 1.U
   }
 
-  io_ledg := false.B
+  io.ledg := false.B
 
-  val uart = Module(new UART(baud = baud, clockHz = clockHz))
-  io <> uart.platIo
+  private val uartM = Module(new uart.UART(baud = baud, clockHz = clockHz))
+  io.plat <> uartM.platIo
 
-  uart.txIo.bits := uart.rxIo.bits.byte
-  uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
-  uart.rxIo.ready := uart.txIo.ready
+  uartM.txIo.bits := uartM.rxIo.bits.byte
+  uartM.txIo.valid := uartM.txIo.ready && uartM.rxIo.valid && !uartM.rxIo.bits.err
+  uartM.rxIo.ready := uartM.txIo.ready
 }
 
 object Top extends App {

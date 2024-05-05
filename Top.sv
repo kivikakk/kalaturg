@@ -338,15 +338,15 @@ endmodule
 module TopInner(
   input  clock,
          reset,
-         io_rx,
-  output io_tx,
+         io_plat_rx,
+  output io_plat_tx,
          io_ledr
 );
 
-  wire        _uart_txIo_ready;
-  wire        _uart_rxIo_valid;
-  wire [7:0]  _uart_rxIo_bits_byte;
-  wire        _uart_rxIo_bits_err;
+  wire        _uartM_txIo_ready;
+  wire        _uartM_rxIo_valid;
+  wire [7:0]  _uartM_rxIo_bits_byte;
+  wire        _uartM_rxIo_bits_err;
   reg         ledReg;
   reg  [22:0] timerReg;
   wire        _GEN = timerReg == 23'h0;
@@ -363,18 +363,18 @@ module TopInner(
         timerReg <= timerReg - 23'h1;
     end
   end // always @(posedge)
-  UART uart (
+  UART uartM (
     .clock          (clock),
     .reset          (reset),
-    .txIo_ready     (_uart_txIo_ready),
-    .txIo_valid     (_uart_txIo_ready & _uart_rxIo_valid & ~_uart_rxIo_bits_err),
-    .txIo_bits      (_uart_rxIo_bits_byte),
-    .rxIo_ready     (_uart_txIo_ready),
-    .rxIo_valid     (_uart_rxIo_valid),
-    .rxIo_bits_byte (_uart_rxIo_bits_byte),
-    .rxIo_bits_err  (_uart_rxIo_bits_err),
-    .platIo_rx      (io_rx),
-    .platIo_tx      (io_tx)
+    .txIo_ready     (_uartM_txIo_ready),
+    .txIo_valid     (_uartM_txIo_ready & _uartM_rxIo_valid & ~_uartM_rxIo_bits_err),
+    .txIo_bits      (_uartM_rxIo_bits_byte),
+    .rxIo_ready     (_uartM_txIo_ready),
+    .rxIo_valid     (_uartM_rxIo_valid),
+    .rxIo_bits_byte (_uartM_rxIo_bits_byte),
+    .rxIo_bits_err  (_uartM_rxIo_bits_err),
+    .platIo_rx      (io_plat_rx),
+    .platIo_tx      (io_plat_tx)
   );
   assign io_ledr = ledReg;
 endmodule
@@ -382,8 +382,8 @@ endmodule
 module top(
   input  clk,
          io_ubtn,
-         io_rx,
-  output io_tx,
+         io_plat_rx,
+  output io_plat_tx,
          io_ledr,
          io_ledg
 );
@@ -395,11 +395,11 @@ module top(
       resetTimerReg <= resetTimerReg + 8'h1;
   end // always @(posedge)
   TopInner inner (
-    .clock   (clk),
-    .reset   (~_GEN | ~io_ubtn),
-    .io_rx   (io_rx),
-    .io_tx   (io_tx),
-    .io_ledr (io_ledr)
+    .clock      (clk),
+    .reset      (~_GEN | ~io_ubtn),
+    .io_plat_rx (io_plat_rx),
+    .io_plat_tx (io_plat_tx),
+    .io_ledr    (io_ledr)
   );
   assign io_ledg = 1'h0;
 endmodule
