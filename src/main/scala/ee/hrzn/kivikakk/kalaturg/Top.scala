@@ -80,7 +80,7 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
     din > cntReg
   }
 
-  // Uses clockHz in scope. Assumes 1024hZ period to simplify things.
+  // Uses clockHz in scope. Assumes 1024Hz period to simplify things.
   private def pwmValue(value: UInt)(implicit potency: Double = 1.0) = {
     val period = clockHz / 1024
     val element = ((period / 255).toDouble * potency).toInt
