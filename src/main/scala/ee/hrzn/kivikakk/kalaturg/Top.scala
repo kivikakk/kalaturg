@@ -7,6 +7,8 @@ import _root_.circt.stage.ChiselStage
 // Notes:
 // - Buttons and LEDs are inverted.
 // - Gotta supply our own POR!
+// - `+` and `-` are truncating by default (to the larger of the inputs),
+//   equivalent to `+%` and `-%`. Use `+&` or `-%` to widen.
 
 class Top(private val baud: Int = 9600, private val clockHz: Int) extends RawModule {
   override def desiredName = "top"
@@ -42,7 +44,7 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
 
   private val ledReg = RegInit(true.B)
   io.ledr := ledReg
-  val timerReg = RegInit(2999_999.U(unsignedBitLength(5_999_999).W))
+  val timerReg = RegInit(2_999_999.U(unsignedBitLength(5_999_999).W))
   when(timerReg === 0.U) {
     ledReg := ~ledReg
     timerReg := 5_999_999.U

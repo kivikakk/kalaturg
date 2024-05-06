@@ -12,9 +12,9 @@ class TX(private val divisor: Int) extends Module {
   }
   private val state = RegInit(State.sIdle)
 
-  private val timerReg = Reg(UInt(unsignedBitLength(divisor - 1).W))
-  private val counterReg = Reg(UInt(unsignedBitLength(9).W))
-  private val shiftReg = Reg(UInt(10.W))
+  private val timerReg = RegInit(0.U(unsignedBitLength(divisor - 1).W))
+  private val counterReg = RegInit(0.U(unsignedBitLength(9).W))
+  private val shiftReg = RegInit(0.U(10.W))
 
   platIo := true.B
   io.ready := false.B
