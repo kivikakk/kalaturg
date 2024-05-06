@@ -363,88 +363,78 @@ module TopInner(
   wire            _uartM_rxIo_bits_err;
   reg             ledReg;
   reg  [22:0]     timerReg;
-  reg  [7:0]      redReg;
-  reg  [7:0]      greenReg;
-  reg  [7:0]      blueReg;
+  reg  [7:0]      rgbVecReg_0;
+  reg  [7:0]      rgbVecReg_1;
+  reg  [7:0]      rgbVecReg_2;
   reg  [13:0]     io_pmod1a1_cntReg;
   reg  [13:0]     io_pmod1a2_cntReg;
   reg  [13:0]     io_pmod1a3_cntReg;
   reg  [14:0]     rgbCounterReg;
-  reg  [2:0]      stageReg;
-  wire            _GEN = greenReg != 8'hFF;
-  wire            _GEN_0 = timerReg == 23'h0;
-  wire            _rgbCounterReg_T = rgbCounterReg == 15'h5B8C;
-  wire            _GEN_1 = stageReg == 3'h0;
-  wire            _GEN_2 = stageReg == 3'h1;
-  wire            _GEN_3 = stageReg == 3'h2;
-  wire            _GEN_4 = blueReg != 8'hFF;
-  wire            _GEN_5 = stageReg == 3'h3;
-  wire            _GEN_6 = stageReg == 3'h4;
-  wire            _GEN_7 = redReg != 8'hFF;
-  wire            _GEN_8 = stageReg == 3'h5;
-  wire [2:0]      _GEN_9 = ~_GEN_8 | (|blueReg) ? stageReg : 3'h0;
-  wire [7:0][2:0] _GEN_10 =
-    {{_GEN_9},
-     {_GEN_9},
-     {_GEN_9},
-     {_GEN_7 ? stageReg : 3'h5},
-     {(|greenReg) ? stageReg : 3'h4},
-     {_GEN_4 ? stageReg : 3'h3},
-     {(|redReg) ? stageReg : 3'h2},
-     {_GEN ? stageReg : 3'h1}};
+  reg  [1:0]      elementIxReg;
+  reg             incrementingReg;
+  wire [3:0][7:0] _GEN = {{rgbVecReg_0}, {rgbVecReg_2}, {rgbVecReg_1}, {rgbVecReg_0}};
+  wire [7:0]      _GEN_0 = _GEN[elementIxReg];
+  wire            _GEN_1 = elementIxReg == 2'h1;
+  wire            _GEN_2 = elementIxReg == 2'h2;
+  wire            _GEN_3 = _GEN_0 != 8'hFF;
+  wire [7:0]      _rgbVecReg_T = _GEN_0 + 8'h1;
+  wire [7:0]      _rgbVecReg_T_2 = _GEN_0 - 8'h1;
+  wire            _GEN_4 = timerReg == 23'h0;
   always @(posedge clock) begin
     if (reset) begin
       ledReg <= 1'h1;
       timerReg <= 23'h2DC6BF;
-      redReg <= 8'hFF;
-      greenReg <= 8'h0;
-      blueReg <= 8'h0;
+      rgbVecReg_0 <= 8'hFF;
+      rgbVecReg_1 <= 8'h0;
+      rgbVecReg_2 <= 8'h0;
       io_pmod1a1_cntReg <= 14'h0;
       io_pmod1a2_cntReg <= 14'h0;
       io_pmod1a3_cntReg <= 14'h0;
       rgbCounterReg <= 15'h0;
-      stageReg <= 3'h0;
+      elementIxReg <= 2'h1;
+      incrementingReg <= 1'h1;
     end
     else begin
-      ledReg <= _GEN_0 ^ ledReg;
-      if (_GEN_0)
+      ledReg <= _GEN_4 ^ ledReg;
+      if (_GEN_4)
         timerReg <= 23'h5B8D7F;
       else
         timerReg <= timerReg - 23'h1;
-      if (~_rgbCounterReg_T | _GEN_1) begin
-      end
-      else if (_GEN_2) begin
-        if (|redReg)
-          redReg <= redReg - 8'h1;
-      end
-      else if (_GEN_3 | _GEN_5 | ~(_GEN_6 & _GEN_7)) begin
-      end
-      else
-        redReg <= redReg + 8'h1;
-      if (_rgbCounterReg_T) begin
-        if (_GEN_1) begin
-          if (_GEN)
-            greenReg <= greenReg + 8'h1;
+      if (rgbCounterReg == 15'h5B8C) begin
+        if (incrementingReg) begin
+          if (_GEN_3 & ~(|elementIxReg))
+            rgbVecReg_0 <= _rgbVecReg_T;
+          if (_GEN_3 & _GEN_1)
+            rgbVecReg_1 <= _rgbVecReg_T;
+          if (_GEN_3 & _GEN_2)
+            rgbVecReg_2 <= _rgbVecReg_T;
+          if (~_GEN_3) begin
+            if (|elementIxReg)
+              elementIxReg <= elementIxReg - 2'h1;
+            else
+              elementIxReg <= 2'h2;
+          end
+          incrementingReg <= _GEN_3 ^ ~incrementingReg;
         end
-        else if (_GEN_2 | _GEN_3 | ~(_GEN_5 & (|greenReg))) begin
+        else begin
+          if ((|_GEN_0) & ~(|elementIxReg))
+            rgbVecReg_0 <= _rgbVecReg_T_2;
+          if ((|_GEN_0) & _GEN_1)
+            rgbVecReg_1 <= _rgbVecReg_T_2;
+          if ((|_GEN_0) & _GEN_2)
+            rgbVecReg_2 <= _rgbVecReg_T_2;
+          if (~(|_GEN_0)) begin
+            if (|elementIxReg)
+              elementIxReg <= elementIxReg - 2'h1;
+            else
+              elementIxReg <= 2'h2;
+          end
+          incrementingReg <= (|_GEN_0) ^ ~incrementingReg;
         end
-        else
-          greenReg <= greenReg - 8'h1;
         rgbCounterReg <= 15'h0;
-        stageReg <= _GEN_10[stageReg];
       end
       else
         rgbCounterReg <= rgbCounterReg + 15'h1;
-      if (~_rgbCounterReg_T | _GEN_1 | _GEN_2) begin
-      end
-      else if (_GEN_3) begin
-        if (_GEN_4)
-          blueReg <= blueReg + 8'h1;
-      end
-      else if (_GEN_5 | _GEN_6 | ~(_GEN_8 & (|blueReg))) begin
-      end
-      else
-        blueReg <= blueReg - 8'h1;
       if (io_pmod1a1_cntReg == 14'h2DC5)
         io_pmod1a1_cntReg <= 14'h0;
       else
@@ -473,9 +463,9 @@ module TopInner(
     .platIo_tx      (io_plat_tx)
   );
   assign io_ledr = ledReg;
-  assign io_pmod1a1 = {6'h0, redReg} * 14'h2D > io_pmod1a1_cntReg;
-  assign io_pmod1a2 = {6'h0, greenReg} * 14'h2D > io_pmod1a2_cntReg;
-  assign io_pmod1a3 = {6'h0, blueReg} * 14'h2D > io_pmod1a3_cntReg;
+  assign io_pmod1a1 = {6'h0, rgbVecReg_0} * 14'h2D > io_pmod1a1_cntReg;
+  assign io_pmod1a2 = {6'h0, rgbVecReg_1} * 14'h2D > io_pmod1a2_cntReg;
+  assign io_pmod1a3 = {6'h0, rgbVecReg_2} * 14'h2D > io_pmod1a3_cntReg;
 endmodule
 
 module top(

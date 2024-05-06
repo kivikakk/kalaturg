@@ -87,42 +87,33 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
     pwm(period, value * element.U)
   }
 
-  private val redReg = RegInit(255.U(8.W))
-  private val greenReg = RegInit(0.U(8.W))
-  private val blueReg = RegInit(0.U(8.W))
+  private val rgbVecReg = RegInit(VecInit(255.U(8.W), 0.U, 0.U))
 
-  io.pmod1a1 := pwmValue(redReg)
-  io.pmod1a2 := pwmValue(greenReg)
-  io.pmod1a3 := pwmValue(blueReg)
+  io.pmod1a1 := pwmValue(rgbVecReg(0))
+  io.pmod1a2 := pwmValue(rgbVecReg(1))
+  io.pmod1a3 := pwmValue(rgbVecReg(2))
 
-  object Stage extends ChiselEnum {
-    val GreenUp, RedDown, BlueUp, GreenDown, RedUp, BlueDown = Value
-  }
-  private val rgbCount = 23_437
+  private val rgbCount = 23_437  // 12_000_000/((256 * 6)/3) 
   private val rgbCounterReg = RegInit(0.U(unsignedBitLength(rgbCount - 1).W))
   rgbCounterReg := Mux(rgbCounterReg === (rgbCount - 1).U, 0.U, rgbCounterReg + 1.U)
 
-  private val stageReg = RegInit(Stage.GreenUp)
+  private val elementIxReg = RegInit(1.U(unsignedBitLength(2).W))
+  private val incrementingReg = RegInit(true.B)
 
   when(rgbCounterReg === (rgbCount - 1).U) {
-    switch(stageReg) {
-      is(Stage.GreenUp) {
-        when(greenReg =/= 255.U) { greenReg := greenReg + 1.U }.otherwise { stageReg := Stage.RedDown }
+    when(incrementingReg) {
+      when(rgbVecReg(elementIxReg) =/= 255.U) {
+        rgbVecReg(elementIxReg) := rgbVecReg(elementIxReg) + 1.U
+      }.otherwise {
+        elementIxReg := Mux(elementIxReg === 0.U, 2.U, elementIxReg - 1.U)
+        incrementingReg := !incrementingReg
       }
-      is(Stage.RedDown) {
-        when(redReg =/= 0.U) { redReg := redReg - 1.U }.otherwise { stageReg := Stage.BlueUp }
-      }
-      is(Stage.BlueUp) {
-        when(blueReg =/= 255.U) { blueReg := blueReg + 1.U }.otherwise { stageReg := Stage.GreenDown }
-      }
-      is(Stage.GreenDown) {
-        when(greenReg =/= 0.U) { greenReg := greenReg - 1.U }.otherwise { stageReg := Stage.RedUp }
-      }
-      is(Stage.RedUp) {
-        when(redReg =/= 255.U) { redReg := redReg + 1.U }.otherwise { stageReg := Stage.BlueDown }
-      }
-      is(Stage.BlueDown) {
-        when(blueReg =/= 0.U) { blueReg := blueReg - 1.U }.otherwise { stageReg := Stage.GreenUp }
+    }.otherwise {
+      when(rgbVecReg(elementIxReg) =/= 0.U) {
+        rgbVecReg(elementIxReg) := rgbVecReg(elementIxReg) - 1.U
+      }.otherwise {
+        elementIxReg := Mux(elementIxReg === 0.U, 2.U, elementIxReg - 1.U)
+        incrementingReg := !incrementingReg
       }
     }
   }
