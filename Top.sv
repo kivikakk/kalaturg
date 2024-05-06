@@ -369,7 +369,7 @@ module TopInner(
   reg  [13:0]     io_pmod1a1_cntReg;
   reg  [13:0]     io_pmod1a2_cntReg;
   reg  [13:0]     io_pmod1a3_cntReg;
-  reg  [14:0]     rgbCounterReg;
+  reg  [15:0]     rgbCounterReg;
   reg  [1:0]      elementIxReg;
   reg             incrementingReg;
   wire [3:0][7:0] _GEN = {{rgbVecReg_0}, {rgbVecReg_2}, {rgbVecReg_1}, {rgbVecReg_0}};
@@ -390,7 +390,7 @@ module TopInner(
       io_pmod1a1_cntReg <= 14'h0;
       io_pmod1a2_cntReg <= 14'h0;
       io_pmod1a3_cntReg <= 14'h0;
-      rgbCounterReg <= 15'h0;
+      rgbCounterReg <= 16'h0;
       elementIxReg <= 2'h1;
       incrementingReg <= 1'h1;
     end
@@ -400,7 +400,7 @@ module TopInner(
         timerReg <= 23'h5B8D7F;
       else
         timerReg <= timerReg - 23'h1;
-      if (rgbCounterReg == 15'h5B8C) begin
+      if (rgbCounterReg == 16'hB71A) begin
         if (incrementingReg) begin
           if (_GEN_3 & ~(|elementIxReg))
             rgbVecReg_0 <= _rgbVecReg_T;
@@ -431,10 +431,10 @@ module TopInner(
           end
           incrementingReg <= (|_GEN_0) ^ ~incrementingReg;
         end
-        rgbCounterReg <= 15'h0;
+        rgbCounterReg <= 16'h0;
       end
       else
-        rgbCounterReg <= rgbCounterReg + 15'h1;
+        rgbCounterReg <= rgbCounterReg + 16'h1;
       if (io_pmod1a1_cntReg == 14'h2DC5)
         io_pmod1a1_cntReg <= 14'h0;
       else
@@ -463,9 +463,9 @@ module TopInner(
     .platIo_tx      (io_plat_tx)
   );
   assign io_ledr = ledReg;
-  assign io_pmod1a1 = {6'h0, rgbVecReg_0} * 14'h2D > io_pmod1a1_cntReg;
-  assign io_pmod1a2 = {6'h0, rgbVecReg_1} * 14'h2D > io_pmod1a2_cntReg;
-  assign io_pmod1a3 = {6'h0, rgbVecReg_2} * 14'h2D > io_pmod1a3_cntReg;
+  assign io_pmod1a1 = {1'h0, {5'h0, rgbVecReg_0} * 13'h16} > io_pmod1a1_cntReg;
+  assign io_pmod1a2 = {1'h0, {5'h0, rgbVecReg_1} * 13'h16} > io_pmod1a2_cntReg;
+  assign io_pmod1a3 = {1'h0, {5'h0, rgbVecReg_2} * 13'h16} > io_pmod1a3_cntReg;
 endmodule
 
 module top(

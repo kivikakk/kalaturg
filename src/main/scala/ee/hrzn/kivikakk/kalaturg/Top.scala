@@ -81,19 +81,20 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
   }
 
   // Uses clockHz in scope. Assumes 1024hZ period to simplify things.
-  private def pwmValue(value: UInt) = {
+  private def pwmValue(value: UInt)(implicit potency: Double = 1.0) = {
     val period = clockHz / 1024
-    val element = period / 255
+    val element = ((period / 255).toDouble * potency).toInt
     pwm(period, value * element.U)
   }
 
   private val rgbVecReg = RegInit(VecInit(255.U(8.W), 0.U, 0.U))
+  implicit private val potency: Double = 0.5
 
   io.pmod1a1 := pwmValue(rgbVecReg(0))
   io.pmod1a2 := pwmValue(rgbVecReg(1))
   io.pmod1a3 := pwmValue(rgbVecReg(2))
 
-  private val rgbCount = 23_437  // 12_000_000/((256 * 6)/3) 
+  private val rgbCount = 12_000_000 / ((256 * 6) / 6)
   private val rgbCounterReg = RegInit(0.U(unsignedBitLength(rgbCount - 1).W))
   rgbCounterReg := Mux(rgbCounterReg === (rgbCount - 1).U, 0.U, rgbCounterReg + 1.U)
 
