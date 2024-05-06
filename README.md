@@ -50,6 +50,7 @@ Done so far:
 * Discover `Queue` and learn how to use `Decoupled` -- use that in RX and TX.
 * Redo the base UART module using `Queue`.
 * Test it on the iCEBreaker!
+* Mess around with SB_RGBA_DRV. Buffer the clock input with SB_GB.
 
 WIP/todo:
 

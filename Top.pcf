@@ -1,5 +1,5 @@
-set_io clk 35
-set_frequency clk 12.0
+set_io clki 35
+set_frequency clki 12.0
 
 set_io io_plat_rx 6
 set_io io_plat_tx 9
@@ -8,3 +8,10 @@ set_io io_ubtn 10
 set_io io_ledr 11
 set_io io_ledg 37
 
+set_io io_ledrgb_r 39
+set_io io_ledrgb_g 40
+set_io io_ledrgb_b 41
+
+set_io io_pmod1a1 4
+set_io io_pmod1a2 2
+set_io io_pmod1a3 47
