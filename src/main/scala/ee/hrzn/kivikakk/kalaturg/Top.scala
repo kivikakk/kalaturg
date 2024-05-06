@@ -4,9 +4,10 @@ import chisel3._
 import chisel3.experimental.ExtModule
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
+import ee.hrzn.kivikakk.sb
 
 // Notes:
-// - Buttons and LEDs are inverted.
+// - Buttons and LEDs are active-low.
 // - Gotta supply our own POR!
 // - `+` and `-` are truncating by default (to the larger of the inputs),
 //   equivalent to `+%` and `-%`. Use `+&` or `-%` to widen.
@@ -18,7 +19,7 @@ class Top(private val baud: Int = 9600, private val clockHz: Int) extends RawMod
 
   private val clki = IO(Input(Clock()))
 
-  private val clk_gb = Module(new SB_GB)
+  private val clk_gb = Module(new sb.SB_GB)
   clk_gb.USER_SIGNAL_TO_GLOBAL_BUFFER := clki
   private val clk = clk_gb.GLOBAL_BUFFER_OUTPUT
 
@@ -38,20 +39,6 @@ class Top(private val baud: Int = 9600, private val clockHz: Int) extends RawMod
   private val inner = withClockAndReset(clk, reset | ~io_ubtn)(Module(new TopInner(baud, clockHz)))
   private val io = IO(new TopIO)
   io <> inner.io
-
-//  val io_ledrgb_r = IO(Output(new Bool()))
-//  val io_ledrgb_g = IO(Output(new Bool()))
-//  val io_ledrgb_b = IO(Output(new Bool()))
-//  private val rgba_drv = Module(new SB_RGBA_DRV)
-//  rgba_drv.CURREN := true.B
-//  rgba_drv.RGBLEDEN := true.B
-//  io_ledrgb_r := rgba_drv.RGB0
-//  io_ledrgb_g := rgba_drv.RGB1
-//  io_ledrgb_b := rgba_drv.RGB2
-
-//  rgba_drv.RGB1PWM := false.B
-//  rgba_drv.RGB0PWM := true.B
-//  rgba_drv.RGB2PWM := true.B
 }
 
 class TopIO extends Bundle {
@@ -62,31 +49,6 @@ class TopIO extends Bundle {
   val pmod1a1 = Output(Bool())
   val pmod1a2 = Output(Bool())
   val pmod1a3 = Output(Bool())
-
-  val ledrgb_r = Output(Bool())
-  val ledrgb_g = Output(Bool())
-  val ledrgb_b = Output(Bool())
-}
-
-class SB_RGBA_DRV extends ExtModule(Map(
-  "CURRENT_MODE" -> "0b0", // full current mode
-  "RGB0_CURRENT" -> "0b000011",
-  "RGB1_CURRENT" -> "0b000011",
-  "RGB2_CURRENT" -> "0b000011",
-)) {
-  val CURREN = IO(Input(Bool()))
-  var RGBLEDEN = IO(Input(Bool()))
-  var RGB0PWM = IO(Input(Bool()))
-  var RGB1PWM = IO(Input(Bool()))
-  var RGB2PWM = IO(Input(Bool()))
-  val RGB0 = IO(Output(Bool()))
-  val RGB1 = IO(Output(Bool()))
-  val RGB2 = IO(Output(Bool()))
-}
-
-class SB_GB extends ExtModule {
-  val USER_SIGNAL_TO_GLOBAL_BUFFER = IO(Input(Clock()))
-  val GLOBAL_BUFFER_OUTPUT = IO(Output(Clock()))
 }
 
 class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
@@ -111,22 +73,59 @@ class TopInner(val baud: Int = 9600, val clockHz: Int) extends Module {
   uartM.txIo.valid := uartM.txIo.ready && uartM.rxIo.valid && !uartM.rxIo.bits.err
   uartM.rxIo.ready := uartM.txIo.ready
 
-  // RGB LED stuff.
-  private val rgba_drv = Module(new SB_RGBA_DRV)
-  rgba_drv.CURREN := true.B
-  rgba_drv.RGBLEDEN := true.B
-  io.ledrgb_r := rgba_drv.RGB2
-  io.ledrgb_g := rgba_drv.RGB1
-  io.ledrgb_b := rgba_drv.RGB0
+  // Produces a square wave over period `period` cycles with duty `din/period`.
+  private def pwm(period: Int, din: UInt) = {
+    val cntReg = RegInit(0.U(unsignedBitLength(period - 1).W))
+    cntReg := Mux(cntReg === (period - 1).U, 0.U, cntReg + 1.U)
+    din > cntReg
+  }
 
-  private val rgbCounterReg = RegInit(0.U(26.W))
-  rgbCounterReg := rgbCounterReg + 1.U
-  rgba_drv.RGB1PWM := rgbCounterReg(24)
-  io.pmod1a1 := rgbCounterReg(24)
-  rgba_drv.RGB0PWM := rgbCounterReg(23)
-  io.pmod1a2 := rgbCounterReg(23)
-  rgba_drv.RGB2PWM := rgbCounterReg(25)
-  io.pmod1a3 := rgbCounterReg(25)
+  // Uses clockHz in scope. Assumes 1024hZ period to simplify things.
+  private def pwmValue(value: UInt) = {
+    val period = clockHz / 1024
+    val element = period / 255
+    pwm(period, value * element.U)
+  }
+
+  private val redReg = RegInit(255.U(8.W))
+  private val greenReg = RegInit(0.U(8.W))
+  private val blueReg = RegInit(0.U(8.W))
+
+  io.pmod1a1 := pwmValue(redReg)
+  io.pmod1a2 := pwmValue(greenReg)
+  io.pmod1a3 := pwmValue(blueReg)
+
+  object Stage extends ChiselEnum {
+    val GreenUp, RedDown, BlueUp, GreenDown, RedUp, BlueDown = Value
+  }
+  private val rgbCount = 23_437
+  private val rgbCounterReg = RegInit(0.U(unsignedBitLength(rgbCount - 1).W))
+  rgbCounterReg := Mux(rgbCounterReg === (rgbCount - 1).U, 0.U, rgbCounterReg + 1.U)
+
+  private val stageReg = RegInit(Stage.GreenUp)
+
+  when(rgbCounterReg === (rgbCount - 1).U) {
+    switch(stageReg) {
+      is(Stage.GreenUp) {
+        when(greenReg =/= 255.U) { greenReg := greenReg + 1.U }.otherwise { stageReg := Stage.RedDown }
+      }
+      is(Stage.RedDown) {
+        when(redReg =/= 0.U) { redReg := redReg - 1.U }.otherwise { stageReg := Stage.BlueUp }
+      }
+      is(Stage.BlueUp) {
+        when(blueReg =/= 255.U) { blueReg := blueReg + 1.U }.otherwise { stageReg := Stage.GreenDown }
+      }
+      is(Stage.GreenDown) {
+        when(greenReg =/= 0.U) { greenReg := greenReg - 1.U }.otherwise { stageReg := Stage.RedUp }
+      }
+      is(Stage.RedUp) {
+        when(redReg =/= 255.U) { redReg := redReg + 1.U }.otherwise { stageReg := Stage.BlueDown }
+      }
+      is(Stage.BlueDown) {
+        when(blueReg =/= 0.U) { blueReg := blueReg - 1.U }.otherwise { stageReg := Stage.GreenUp }
+      }
+    }
+  }
 }
 
 object Top extends App {
@@ -135,6 +134,6 @@ object Top extends App {
     "-disable-all-randomization",
     "-strip-debug-info",
   )
-  println(ChiselStage.emitFIRRTLDialect(new Top(clockHz = 12_000_000), firtoolOpts = firtoolOpts))
+  // println(ChiselStage.emitFIRRTLDialect(new Top(clockHz = 12_000_000), firtoolOpts = firtoolOpts))
   ChiselStage.emitSystemVerilogFile(new Top(clockHz = 12_000_000), firtoolOpts = firtoolOpts)
 }

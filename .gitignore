@@ -13,6 +13,10 @@
 *.rpt
 *.tim
 
+.metals/
+.bloop/
+metals.sbt
+
 .bsp/
 .cache
 .history

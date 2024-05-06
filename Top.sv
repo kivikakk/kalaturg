@@ -346,8 +346,6 @@ module UART(
   );
 endmodule
 
-// external module SB_RGBA_DRV
-
 module TopInner(
   input  clock,
          reset,
@@ -356,33 +354,109 @@ module TopInner(
          io_ledr,
          io_pmod1a1,
          io_pmod1a2,
-         io_pmod1a3,
-         io_ledrgb_r,
-         io_ledrgb_g,
-         io_ledrgb_b
+         io_pmod1a3
 );
 
-  wire        _uartM_txIo_ready;
-  wire        _uartM_rxIo_valid;
-  wire [7:0]  _uartM_rxIo_bits_byte;
-  wire        _uartM_rxIo_bits_err;
-  reg         ledReg;
-  reg  [22:0] timerReg;
-  reg  [25:0] rgbCounterReg;
-  wire        _GEN = timerReg == 23'h0;
+  wire            _uartM_txIo_ready;
+  wire            _uartM_rxIo_valid;
+  wire [7:0]      _uartM_rxIo_bits_byte;
+  wire            _uartM_rxIo_bits_err;
+  reg             ledReg;
+  reg  [22:0]     timerReg;
+  reg  [7:0]      redReg;
+  reg  [7:0]      greenReg;
+  reg  [7:0]      blueReg;
+  reg  [13:0]     io_pmod1a1_cntReg;
+  reg  [13:0]     io_pmod1a2_cntReg;
+  reg  [13:0]     io_pmod1a3_cntReg;
+  reg  [14:0]     rgbCounterReg;
+  reg  [2:0]      stageReg;
+  wire            _GEN = greenReg != 8'hFF;
+  wire            _GEN_0 = timerReg == 23'h0;
+  wire            _rgbCounterReg_T = rgbCounterReg == 15'h5B8C;
+  wire            _GEN_1 = stageReg == 3'h0;
+  wire            _GEN_2 = stageReg == 3'h1;
+  wire            _GEN_3 = stageReg == 3'h2;
+  wire            _GEN_4 = blueReg != 8'hFF;
+  wire            _GEN_5 = stageReg == 3'h3;
+  wire            _GEN_6 = stageReg == 3'h4;
+  wire            _GEN_7 = redReg != 8'hFF;
+  wire            _GEN_8 = stageReg == 3'h5;
+  wire [2:0]      _GEN_9 = ~_GEN_8 | (|blueReg) ? stageReg : 3'h0;
+  wire [7:0][2:0] _GEN_10 =
+    {{_GEN_9},
+     {_GEN_9},
+     {_GEN_9},
+     {_GEN_7 ? stageReg : 3'h5},
+     {(|greenReg) ? stageReg : 3'h4},
+     {_GEN_4 ? stageReg : 3'h3},
+     {(|redReg) ? stageReg : 3'h2},
+     {_GEN ? stageReg : 3'h1}};
   always @(posedge clock) begin
     if (reset) begin
       ledReg <= 1'h1;
       timerReg <= 23'h2DC6BF;
-      rgbCounterReg <= 26'h0;
+      redReg <= 8'hFF;
+      greenReg <= 8'h0;
+      blueReg <= 8'h0;
+      io_pmod1a1_cntReg <= 14'h0;
+      io_pmod1a2_cntReg <= 14'h0;
+      io_pmod1a3_cntReg <= 14'h0;
+      rgbCounterReg <= 15'h0;
+      stageReg <= 3'h0;
     end
     else begin
-      ledReg <= _GEN ^ ledReg;
-      if (_GEN)
+      ledReg <= _GEN_0 ^ ledReg;
+      if (_GEN_0)
         timerReg <= 23'h5B8D7F;
       else
         timerReg <= timerReg - 23'h1;
-      rgbCounterReg <= rgbCounterReg + 26'h1;
+      if (~_rgbCounterReg_T | _GEN_1) begin
+      end
+      else if (_GEN_2) begin
+        if (|redReg)
+          redReg <= redReg - 8'h1;
+      end
+      else if (_GEN_3 | _GEN_5 | ~(_GEN_6 & _GEN_7)) begin
+      end
+      else
+        redReg <= redReg + 8'h1;
+      if (_rgbCounterReg_T) begin
+        if (_GEN_1) begin
+          if (_GEN)
+            greenReg <= greenReg + 8'h1;
+        end
+        else if (_GEN_2 | _GEN_3 | ~(_GEN_5 & (|greenReg))) begin
+        end
+        else
+          greenReg <= greenReg - 8'h1;
+        rgbCounterReg <= 15'h0;
+        stageReg <= _GEN_10[stageReg];
+      end
+      else
+        rgbCounterReg <= rgbCounterReg + 15'h1;
+      if (~_rgbCounterReg_T | _GEN_1 | _GEN_2) begin
+      end
+      else if (_GEN_3) begin
+        if (_GEN_4)
+          blueReg <= blueReg + 8'h1;
+      end
+      else if (_GEN_5 | _GEN_6 | ~(_GEN_8 & (|blueReg))) begin
+      end
+      else
+        blueReg <= blueReg - 8'h1;
+      if (io_pmod1a1_cntReg == 14'h2DC5)
+        io_pmod1a1_cntReg <= 14'h0;
+      else
+        io_pmod1a1_cntReg <= io_pmod1a1_cntReg + 14'h1;
+      if (io_pmod1a2_cntReg == 14'h2DC5)
+        io_pmod1a2_cntReg <= 14'h0;
+      else
+        io_pmod1a2_cntReg <= io_pmod1a2_cntReg + 14'h1;
+      if (io_pmod1a3_cntReg == 14'h2DC5)
+        io_pmod1a3_cntReg <= 14'h0;
+      else
+        io_pmod1a3_cntReg <= io_pmod1a3_cntReg + 14'h1;
     end
   end // always @(posedge)
   UART uartM (
@@ -398,25 +472,10 @@ module TopInner(
     .platIo_rx      (io_plat_rx),
     .platIo_tx      (io_plat_tx)
   );
-  SB_RGBA_DRV #(
-    .CURRENT_MODE("0b0"),
-    .RGB0_CURRENT("0b000011"),
-    .RGB1_CURRENT("0b000011"),
-    .RGB2_CURRENT("0b000011")
-  ) rgba_drv (
-    .CURREN   (1'h1),
-    .RGBLEDEN (1'h1),
-    .RGB0PWM  (rgbCounterReg[23]),
-    .RGB1PWM  (rgbCounterReg[24]),
-    .RGB2PWM  (rgbCounterReg[25]),
-    .RGB0     (io_ledrgb_b),
-    .RGB1     (io_ledrgb_g),
-    .RGB2     (io_ledrgb_r)
-  );
   assign io_ledr = ledReg;
-  assign io_pmod1a1 = rgbCounterReg[24];
-  assign io_pmod1a2 = rgbCounterReg[23];
-  assign io_pmod1a3 = rgbCounterReg[25];
+  assign io_pmod1a1 = {6'h0, redReg} * 14'h2D > io_pmod1a1_cntReg;
+  assign io_pmod1a2 = {6'h0, greenReg} * 14'h2D > io_pmod1a2_cntReg;
+  assign io_pmod1a3 = {6'h0, blueReg} * 14'h2D > io_pmod1a3_cntReg;
 endmodule
 
 module top(
@@ -428,10 +487,7 @@ module top(
          io_ledg,
          io_pmod1a1,
          io_pmod1a2,
-         io_pmod1a3,
-         io_ledrgb_r,
-         io_ledrgb_g,
-         io_ledrgb_b
+         io_pmod1a3
 );
 
   wire       _clk_gb_GLOBAL_BUFFER_OUTPUT;
@@ -446,17 +502,14 @@ module top(
     .GLOBAL_BUFFER_OUTPUT         (_clk_gb_GLOBAL_BUFFER_OUTPUT)
   );
   TopInner inner (
-    .clock       (_clk_gb_GLOBAL_BUFFER_OUTPUT),
-    .reset       (~_GEN | ~io_ubtn),
-    .io_plat_rx  (io_plat_rx),
-    .io_plat_tx  (io_plat_tx),
-    .io_ledr     (io_ledr),
-    .io_pmod1a1  (io_pmod1a1),
-    .io_pmod1a2  (io_pmod1a2),
-    .io_pmod1a3  (io_pmod1a3),
-    .io_ledrgb_r (io_ledrgb_r),
-    .io_ledrgb_g (io_ledrgb_g),
-    .io_ledrgb_b (io_ledrgb_b)
+    .clock      (_clk_gb_GLOBAL_BUFFER_OUTPUT),
+    .reset      (~_GEN | ~io_ubtn),
+    .io_plat_rx (io_plat_rx),
+    .io_plat_tx (io_plat_tx),
+    .io_ledr    (io_ledr),
+    .io_pmod1a1 (io_pmod1a1),
+    .io_pmod1a2 (io_pmod1a2),
+    .io_pmod1a3 (io_pmod1a3)
   );
   assign io_ledg = 1'h0;
 endmodule
