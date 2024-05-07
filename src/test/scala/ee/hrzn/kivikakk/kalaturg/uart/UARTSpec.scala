@@ -5,14 +5,17 @@ import chiseltest._
 import chiseltest.simulator.WriteVcdAnnotation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
+import ee.hrzn.kivikakk.sb.ClockSpeed
 
 class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   behavior.of("UART")
 
   // These tests are *really* ugly, but they work for now. Need more clarity.
 
+  implicit private val clockSpeed: ClockSpeed = ClockSpeed(hz = 3)
+
   it should "receive a byte" in {
-    test(new UART(baud = 1, clockHz = 3)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
       // Assert START and hold for one bit.
       c.platIo.rx.poke(false.B)
 
@@ -50,7 +53,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   }
 
   it should "transmit a byte" in {
-    test(new UART(baud = 1, clockHz = 3)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
       // Generate a byte and request it to be sent.
       val input = (new scala.util.Random).nextInt(256)
       c.txIo.bits.poke(input.U)

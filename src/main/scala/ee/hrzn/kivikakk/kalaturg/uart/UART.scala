@@ -2,9 +2,10 @@ package ee.hrzn.kivikakk.kalaturg.uart
 
 import chisel3._
 import chisel3.util._
+import ee.hrzn.kivikakk.sb.ClockSpeed
 
-class UART(val baud: Int = 9600, val clockHz: Int) extends Module {
-  val divisor = clockHz / baud
+class UART(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed) extends Module {
+  val divisor = clockSpeed.hz / baud
 
   val txIo = IO(Flipped(Decoupled(UInt(8.W))))
   val rxIo = IO(Decoupled(new RXOut))

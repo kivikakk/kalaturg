@@ -25,7 +25,7 @@ class TopIO extends Bundle {
   val pmod1a3 = Output(Bool())
 }
 
-class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopIO] {
+class Top(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed) extends Module with HasIO[TopIO] {
   def createIo() = new TopIO
 
   private val ledReg = RegInit(true.B)
@@ -40,7 +40,7 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopI
 
   io.ledg := false.B
 
-  private val uartM = Module(new uart.UART(baud = baud, clockHz = clockHz))
+  private val uartM = Module(new uart.UART(baud = baud))
   io.plat <> uartM.platIo
 
   uartM.txIo.bits := uartM.rxIo.bits.byte
@@ -54,19 +54,19 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopI
     din > cntReg
   }
 
-  // Uses clockHz in scope. Assumes 1024Hz period to simplify things.
-  private def pwmValue(value: UInt)(implicit potency: Double = 1.0) = {
-    val period = clockHz / 1024
+  // Assumes 1024Hz period to simplify things.
+  private def pwmValue(value: UInt, potency: Double = 1.0)(implicit clockSpeed: ClockSpeed) = {
+    val period = clockSpeed.hz / 1024
     val element = ((period / 255).toDouble * potency).toInt
     pwm(period, value * element.U)
   }
 
   private val rgbVecReg = RegInit(VecInit(255.U(8.W), 0.U, 0.U))
-  implicit private val potency: Double = 0.5
 
-  io.pmod1a1 := pwmValue(rgbVecReg(0))
-  io.pmod1a2 := pwmValue(rgbVecReg(1))
-  io.pmod1a3 := pwmValue(rgbVecReg(2))
+  private val potency = 0.5
+  io.pmod1a1 := pwmValue(rgbVecReg(0), potency)
+  io.pmod1a2 := pwmValue(rgbVecReg(1), potency)
+  io.pmod1a3 := pwmValue(rgbVecReg(2), potency)
 
   private val rgbCount = 12_000_000 / ((256 * 6) / 6)
   private val rgbCounterReg = RegInit(0.U(unsignedBitLength(rgbCount - 1).W))
@@ -96,7 +96,7 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopI
 
 object Top extends App {
   def apply(baud: Int = 9600)(implicit clockSpeed: ClockSpeed): RawModule =
-    ICE40Top(new Top(baud = baud, clockHz = clockSpeed.clockHz))
+    ICE40Top(new Top(baud = baud))
 
   private val firtoolOpts = Array(
     "--lowering-options=disallowLocalVariables",
