@@ -2,12 +2,12 @@
 
 set -ex
 
-yosys -g -l Top.rpt <<YOSYS
+yosys -g -l build/Top.rpt <<YOSYS
 read_verilog -sv Top.sv
 synth_ice40 -top top
-write_json Top.json
+write_json build/Top.json
 YOSYS
 
-nextpnr-ice40 --log Top.tim --up5k --package sg48 --json Top.json --pcf Top.pcf --asc Top.asc
-icepack Top.asc Top.bin
-iceprog Top.bin
+nextpnr-ice40 --log build/Top.tim --up5k --package sg48 --json build/Top.json --pcf Top.pcf --asc build/Top.asc
+icepack build/Top.asc build/Top.bin
+iceprog build/Top.bin
