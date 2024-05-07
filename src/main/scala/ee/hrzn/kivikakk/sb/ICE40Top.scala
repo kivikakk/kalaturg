@@ -11,11 +11,11 @@ trait HasIO[ContainedIO <: Data] extends BaseModule {
 }
 
 class ICE40Top[
-  WrappedTop <: HasIO[_ <: Data],
+    WrappedTop <: HasIO[_ <: Data],
 ](
-  wrapped: => WrappedTop,
-)(
-  implicit clockSpeed: ClockSpeed,
+    wrapped: => WrappedTop,
+)(implicit
+    clockSpeed: ClockSpeed,
 ) extends RawModule {
   override def desiredName = "top"
 
@@ -26,25 +26,29 @@ class ICE40Top[
   private val clk = clk_gb.GLOBAL_BUFFER_OUTPUT
 
   private val timerLimit = (15e-6 * clockSpeed.hz).toInt
-  private val resetTimerReg = withClock(clk)(Reg(UInt(unsignedBitLength(timerLimit).W)))
+  private val resetTimerReg =
+    withClock(clk)(Reg(UInt(unsignedBitLength(timerLimit).W)))
   private val reset = Wire(Bool())
 
   when(resetTimerReg === timerLimit.U) {
     reset := false.B
   }.otherwise {
-    reset := true.B
+    reset         := true.B
     resetTimerReg := resetTimerReg + 1.U
   }
 
   private val io_ubtn = IO(Input(Bool()))
 
-  private val wrappedModule = withClockAndReset(clk, reset | ~io_ubtn)(Module(wrapped))
+  private val wrappedModule =
+    withClockAndReset(clk, reset | ~io_ubtn)(Module(wrapped))
   private val io = IO(wrappedModule.createIo())
   io <> wrappedModule.io
 }
 
 object ICE40Top {
-  def apply[WrappedTop <: HasIO[_ <: Data]](wrapped: => WrappedTop)(implicit clockSpeed: ClockSpeed) =
+  def apply[WrappedTop <: HasIO[_ <: Data]](wrapped: => WrappedTop)(implicit
+      clockSpeed: ClockSpeed,
+  ) =
     new ICE40Top(wrapped)
 }
 

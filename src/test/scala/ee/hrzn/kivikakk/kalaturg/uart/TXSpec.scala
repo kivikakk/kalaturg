@@ -9,7 +9,7 @@ class TXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   behavior.of("TX")
 
   it should "transmit a byte" in {
-    test(new TX(divisor = 3)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new TX(divisor = 3)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
       // Note that poked inputs take effect *immediately* on combinatorial
       // circuits. We want to poke as the first thing we do in any simulated
       // cycle, as if responding to the last cycle.  We do this before any
@@ -24,10 +24,13 @@ class TXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
 
       c.io.valid.poke(false.B)
 
-      for { bit <- Seq(0, 1, 0, 1, 0, 1, 1, 0, 0, 1); i <- 0 until 3 } {
+      for {
+        bit <- Seq(0, 1, 0, 1, 0, 1, 1, 0, 0, 1)
+        i   <- 0 until 3
+      } {
         c.platIo.expect((bit == 1).B)
         c.clock.step()
       }
-    })
+    }
   }
 }

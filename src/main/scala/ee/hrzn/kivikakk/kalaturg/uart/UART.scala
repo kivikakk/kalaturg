@@ -4,11 +4,12 @@ import chisel3._
 import chisel3.util._
 import ee.hrzn.kivikakk.sb.ClockSpeed
 
-class UART(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed) extends Module {
+class UART(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed)
+    extends Module {
   val divisor = clockSpeed.hz / baud
 
-  val txIo = IO(Flipped(Decoupled(UInt(8.W))))
-  val rxIo = IO(Decoupled(new RXOut))
+  val txIo   = IO(Flipped(Decoupled(UInt(8.W))))
+  val rxIo   = IO(Decoupled(new RXOut))
   val platIo = IO(new IO)
 
   val rx = Module(new RX(divisor))

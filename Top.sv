@@ -17,12 +17,12 @@ module RX(
   reg  [7:0]      bitsReg_byte;
   reg             bitsReg_err;
   reg  [1:0]      state;
-  reg  [10:0]     timerReg;
+  reg  [6:0]      timerReg;
   reg  [3:0]      counterReg;
   reg  [9:0]      shiftReg;
   wire            _GEN = state == 2'h0;
   wire            _GEN_0 = state == 2'h1;
-  wire            _GEN_1 = timerReg == 11'h0;
+  wire            _GEN_1 = timerReg == 7'h0;
   wire            _GEN_2 = _GEN_0 & _GEN_1;
   wire            _GEN_3 = state == 2'h2;
   wire            _GEN_4 = _GEN | _GEN_0;
@@ -39,7 +39,7 @@ module RX(
       bitsReg_byte <= 8'h0;
       bitsReg_err <= 1'h0;
       state <= 2'h0;
-      timerReg <= 11'h0;
+      timerReg <= 7'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
@@ -61,16 +61,16 @@ module RX(
         if (syncedPlatIo) begin
         end
         else begin
-          timerReg <= 11'h271;
+          timerReg <= 7'h34;
           counterReg <= 4'h9;
         end
       end
       else begin
         if (_GEN_0) begin
           if (_GEN_1)
-            timerReg <= 11'h4E1;
+            timerReg <= 7'h67;
           else
-            timerReg <= timerReg - 11'h1;
+            timerReg <= timerReg - 7'h1;
         end
         if (_GEN_2)
           counterReg <= counterReg - 4'h1;
@@ -174,24 +174,24 @@ module TX(
   output       platIo
 );
 
-  reg         state;
-  reg  [10:0] timerReg;
-  reg  [3:0]  counterReg;
-  reg  [9:0]  shiftReg;
-  wire        _GEN = timerReg == 11'h0;
+  reg        state;
+  reg  [6:0] timerReg;
+  reg  [3:0] counterReg;
+  reg  [9:0] shiftReg;
+  wire       _GEN = timerReg == 7'h0;
   always @(posedge clock) begin
     if (reset) begin
       state <= 1'h0;
-      timerReg <= 11'h0;
+      timerReg <= 7'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
     else if (state) begin
       state <= ~(state & _GEN & counterReg == 4'h0) & state;
       if (_GEN)
-        timerReg <= 11'h4E1;
+        timerReg <= 7'h67;
       else
-        timerReg <= timerReg - 11'h1;
+        timerReg <= timerReg - 7'h1;
       if (state & _GEN) begin
         counterReg <= counterReg - 4'h1;
         shiftReg <= {shiftReg[8:0], 1'h0};
@@ -200,7 +200,7 @@ module TX(
     else begin
       state <= io_valid | state;
       if (io_valid) begin
-        timerReg <= 11'h4E1;
+        timerReg <= 7'h67;
         counterReg <= 4'h9;
         shiftReg <= {1'h0, io_bits, 1'h1};
       end
@@ -448,10 +448,10 @@ module Top(
          io_pwm_pmod1a3
 );
 
-  wire        _uartM_txIo_ready;
-  wire        _uartM_rxIo_valid;
-  wire [7:0]  _uartM_rxIo_bits_byte;
-  wire        _uartM_rxIo_bits_err;
+  wire        _uart_txIo_ready;
+  wire        _uart_rxIo_valid;
+  wire [7:0]  _uart_rxIo_bits_byte;
+  wire        _uart_rxIo_bits_err;
   reg         ledReg;
   reg  [22:0] timerReg;
   wire        _GEN = timerReg == 23'h0;
@@ -468,16 +468,16 @@ module Top(
         timerReg <= timerReg - 23'h1;
     end
   end // always @(posedge)
-  UART uartM (
+  UART uart (
     .clock          (clock),
     .reset          (reset),
-    .txIo_ready     (_uartM_txIo_ready),
-    .txIo_valid     (_uartM_txIo_ready & _uartM_rxIo_valid & ~_uartM_rxIo_bits_err),
-    .txIo_bits      (_uartM_rxIo_bits_byte),
-    .rxIo_ready     (_uartM_txIo_ready),
-    .rxIo_valid     (_uartM_rxIo_valid),
-    .rxIo_bits_byte (_uartM_rxIo_bits_byte),
-    .rxIo_bits_err  (_uartM_rxIo_bits_err),
+    .txIo_ready     (_uart_txIo_ready),
+    .txIo_valid     (_uart_txIo_ready & _uart_rxIo_valid & ~_uart_rxIo_bits_err),
+    .txIo_bits      (_uart_rxIo_bits_byte),
+    .rxIo_ready     (_uart_txIo_ready),
+    .rxIo_valid     (_uart_rxIo_valid),
+    .rxIo_bits_byte (_uart_rxIo_bits_byte),
+    .rxIo_bits_err  (_uart_rxIo_bits_err),
     .platIo_rx      (io_plat_rx),
     .platIo_tx      (io_plat_tx)
   );

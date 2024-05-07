@@ -3,9 +3,9 @@ package ee.hrzn.kivikakk.kalaturg.uart
 import chisel3._
 import chiseltest._
 import chiseltest.simulator.WriteVcdAnnotation
+import ee.hrzn.kivikakk.sb.ClockSpeed
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
-import ee.hrzn.kivikakk.sb.ClockSpeed
 
 class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   behavior.of("UART")
@@ -15,7 +15,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   implicit private val clockSpeed: ClockSpeed = ClockSpeed(hz = 3)
 
   it should "receive a byte" in {
-    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
       // Assert START and hold for one bit.
       c.platIo.rx.poke(false.B)
 
@@ -25,7 +25,10 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
 
       // Generate a byte and play it out. Ensure we remain not `rdy`.
       val input = (new scala.util.Random).nextInt(256)
-      for (bitIx <- 7 to 0 by -1 ; i <- 0 until 3) {
+      for {
+        bitIx <- 7 to 0 by -1
+        i     <- 0 until 3
+      } {
         c.platIo.rx.poke(((input & (1 << bitIx)) != 0).B)
         c.rxIo.valid.expect(false.B)
         c.clock.step()
@@ -49,11 +52,11 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.clock.step()
       c.rxIo.ready.poke(false.B)
       c.rxIo.valid.expect(false.B)
-    })
+    }
   }
 
   it should "transmit a byte" in {
-    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation))(c => {
+    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
       // Generate a byte and request it to be sent.
       val input = (new scala.util.Random).nextInt(256)
       c.txIo.bits.poke(input.U)
@@ -73,7 +76,10 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       }
 
       // Check for each bit in turn.
-      for { bitIx <- 7 to 0 by -1 ; i <- 0 until 3 } {
+      for {
+        bitIx <- 7 to 0 by -1
+        i     <- 0 until 3
+      } {
         c.clock.step()
         c.platIo.tx.expect(((input & (1 << bitIx)) != 0).B)
       }
@@ -83,6 +89,6 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
         c.clock.step()
         c.platIo.tx.expect(true.B)
       }
-    })
+    }
   }
 }
