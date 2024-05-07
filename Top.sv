@@ -346,7 +346,7 @@ module UART(
   );
 endmodule
 
-module TopInner(
+module Top(
   input  clock,
          reset,
          io_plat_rx,
@@ -491,7 +491,7 @@ module top(
     .USER_SIGNAL_TO_GLOBAL_BUFFER (clki),
     .GLOBAL_BUFFER_OUTPUT         (_clk_gb_GLOBAL_BUFFER_OUTPUT)
   );
-  TopInner inner (
+  Top innerModule (
     .clock      (_clk_gb_GLOBAL_BUFFER_OUTPUT),
     .reset      (~_GEN | ~io_ubtn),
     .io_plat_rx (io_plat_rx),

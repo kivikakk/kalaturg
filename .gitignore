@@ -7,6 +7,8 @@ build/
 *.rpt
 *.tim
 
+target/
+
 .metals/
 .bloop/
 metals.sbt
