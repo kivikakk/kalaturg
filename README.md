@@ -1,11 +1,11 @@
-# Steps to disentanglement
+# Moving forward
 
-I'm no longer able to use Amaranth — I don't feel able to depend on something
-I'm not allowed to contribute to — so I need a way to continue on with my FPGA
-studies without it. I don't really view just trying to cobble together Verilog
-as viable for me right now; I'm rather dependent on having a decent higher-level
-thing going, and I already feel all the wind sucked out of my sails from having
-to make any change whatsoever.
+My days of using Amaranth are over. I don't feel able — nor do I _want_ — to
+depend on something I'm not allowed(!) to contribute to, so I need a way to
+continue on with my FPGA studies without it. I don't really view just trying
+to cobble together Verilog as viable for me right now; I'm rather dependent on
+having a decent higher-level thing going, and I already feel all the wind sucked
+out of my sails from having to make any change whatsoever.
 
 I've experimented with doing my own HDL using what I learned from working with
 and on Amaranth (and Yosys, which I'll happily continue to depend on), but it's
