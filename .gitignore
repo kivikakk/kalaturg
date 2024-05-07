@@ -1,10 +1,4 @@
-**/__pypackages__/
-**/__pycache__/
-/build/
-/result
-.pdm-build
-
-.DS_Store
+build/
 
 *.asc
 *.bin
@@ -17,16 +11,4 @@
 .bloop/
 metals.sbt
 
-.bsp/
-.cache
-.history
-.idea/
-.lib/
-dist/*
-lib_managed/
-project/boot/
-project/plugins/project/
-project/project/target/
-src_managed/
-target/
-test_run_dir/
+.DS_Store
