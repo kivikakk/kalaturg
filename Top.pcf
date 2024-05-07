@@ -8,6 +8,6 @@ set_io io_ubtn 10
 set_io io_ledr 11
 set_io io_ledg 37
 
-set_io io_pmod1a1 4
-set_io io_pmod1a2 2
-set_io io_pmod1a3 47
+set_io io_pwm_pmod1a1 4
+set_io io_pwm_pmod1a2 2
+set_io io_pwm_pmod1a3 47

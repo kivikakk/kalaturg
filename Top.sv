@@ -8,21 +8,21 @@ module RX(
   output       io_valid,
   output [7:0] io_bits_byte,
   output       io_bits_err,
-  input        platIo
+  input        pinIo
 );
 
-  reg             syncedPlatIo_REG;
-  reg             syncedPlatIo;
+  reg             syncedPinIo_REG;
+  reg             syncedPinIo;
   reg             validReg;
   reg  [7:0]      bitsReg_byte;
   reg             bitsReg_err;
   reg  [1:0]      state;
-  reg  [6:0]      timerReg;
+  reg  [5:0]      timerReg;
   reg  [3:0]      counterReg;
   reg  [9:0]      shiftReg;
   wire            _GEN = state == 2'h0;
   wire            _GEN_0 = state == 2'h1;
-  wire            _GEN_1 = timerReg == 7'h0;
+  wire            _GEN_1 = timerReg == 6'h0;
   wire            _GEN_2 = _GEN_0 & _GEN_1;
   wire            _GEN_3 = state == 2'h2;
   wire            _GEN_4 = _GEN | _GEN_0;
@@ -30,22 +30,22 @@ module RX(
     {{state},
      {2'h0},
      {_GEN_1 & counterReg == 4'h0 ? 2'h2 : state},
-     {syncedPlatIo ? state : 2'h1}};
+     {syncedPinIo ? state : 2'h1}};
   always @(posedge clock) begin
     if (reset) begin
-      syncedPlatIo_REG <= 1'h1;
-      syncedPlatIo <= 1'h1;
+      syncedPinIo_REG <= 1'h1;
+      syncedPinIo <= 1'h1;
       validReg <= 1'h0;
       bitsReg_byte <= 8'h0;
       bitsReg_err <= 1'h0;
       state <= 2'h0;
-      timerReg <= 7'h0;
+      timerReg <= 6'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
     else begin
-      syncedPlatIo_REG <= platIo;
-      syncedPlatIo <= syncedPlatIo_REG;
+      syncedPinIo_REG <= pinIo;
+      syncedPinIo <= syncedPinIo_REG;
       if (_GEN_4 | ~_GEN_3)
         validReg <= ~io_ready & validReg;
       else
@@ -58,19 +58,19 @@ module RX(
       end
       state <= _GEN_5[state];
       if (_GEN) begin
-        if (syncedPlatIo) begin
+        if (syncedPinIo) begin
         end
         else begin
-          timerReg <= 7'h34;
+          timerReg <= 6'h1A;
           counterReg <= 4'h9;
         end
       end
       else begin
         if (_GEN_0) begin
           if (_GEN_1)
-            timerReg <= 7'h67;
+            timerReg <= 6'h33;
           else
-            timerReg <= timerReg - 7'h1;
+            timerReg <= timerReg - 6'h1;
         end
         if (_GEN_2)
           counterReg <= counterReg - 4'h1;
@@ -78,7 +78,7 @@ module RX(
       if (_GEN | ~_GEN_2) begin
       end
       else
-        shiftReg <= {shiftReg[8:0], syncedPlatIo};
+        shiftReg <= {shiftReg[8:0], syncedPinIo};
     end
   end // always @(posedge)
   assign io_valid = validReg;
@@ -171,27 +171,27 @@ module TX(
   output       io_ready,
   input        io_valid,
   input  [7:0] io_bits,
-  output       platIo
+  output       pinIo
 );
 
   reg        state;
-  reg  [6:0] timerReg;
+  reg  [5:0] timerReg;
   reg  [3:0] counterReg;
   reg  [9:0] shiftReg;
-  wire       _GEN = timerReg == 7'h0;
+  wire       _GEN = timerReg == 6'h0;
   always @(posedge clock) begin
     if (reset) begin
       state <= 1'h0;
-      timerReg <= 7'h0;
+      timerReg <= 6'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
     else if (state) begin
       state <= ~(state & _GEN & counterReg == 4'h0) & state;
       if (_GEN)
-        timerReg <= 7'h67;
+        timerReg <= 6'h33;
       else
-        timerReg <= timerReg - 7'h1;
+        timerReg <= timerReg - 6'h1;
       if (state & _GEN) begin
         counterReg <= counterReg - 4'h1;
         shiftReg <= {shiftReg[8:0], 1'h0};
@@ -200,14 +200,14 @@ module TX(
     else begin
       state <= io_valid | state;
       if (io_valid) begin
-        timerReg <= 7'h67;
+        timerReg <= 6'h33;
         counterReg <= 4'h9;
         shiftReg <= {1'h0, io_bits, 1'h1};
       end
     end
   end // always @(posedge)
   assign io_ready = ~state;
-  assign platIo = ~state | ~state | shiftReg[9];
+  assign pinIo = ~state | ~state | shiftReg[9];
 endmodule
 
 // VCS coverage exclude_file
@@ -294,8 +294,8 @@ module UART(
   output       rxIo_valid,
   output [7:0] rxIo_bits_byte,
   output       rxIo_bits_err,
-  input        platIo_rx,
-  output       platIo_tx
+  input        pinsIo_rx,
+  output       pinsIo_tx
 );
 
   wire       _tx_io_q_io_deq_valid;
@@ -312,7 +312,7 @@ module UART(
     .io_valid     (_rx_io_valid),
     .io_bits_byte (_rx_io_bits_byte),
     .io_bits_err  (_rx_io_bits_err),
-    .platIo       (platIo_rx)
+    .pinIo        (pinsIo_rx)
   );
   Queue32_RXOut rxIo_q (
     .clock            (clock),
@@ -332,7 +332,7 @@ module UART(
     .io_ready (_tx_io_ready),
     .io_valid (_tx_io_q_io_deq_valid),
     .io_bits  (_tx_io_q_io_deq_bits),
-    .platIo   (platIo_tx)
+    .pinIo    (pinsIo_tx)
   );
   Queue32_UInt8 tx_io_q (
     .clock        (clock),
@@ -440,8 +440,8 @@ endmodule
 module Top(
   input  clock,
          reset,
-         io_plat_rx,
-  output io_plat_tx,
+         io_pins_rx,
+  output io_pins_tx,
          io_ledr,
          io_pwm_pmod1a1,
          io_pwm_pmod1a2,
@@ -478,8 +478,8 @@ module Top(
     .rxIo_valid     (_uart_rxIo_valid),
     .rxIo_bits_byte (_uart_rxIo_bits_byte),
     .rxIo_bits_err  (_uart_rxIo_bits_err),
-    .platIo_rx      (io_plat_rx),
-    .platIo_tx      (io_plat_tx)
+    .pinsIo_rx      (io_pins_rx),
+    .pinsIo_tx      (io_pins_tx)
   );
   PWM pwm (
     .clock      (clock),
@@ -494,8 +494,8 @@ endmodule
 module top(
   input  clki,
          io_ubtn,
-         io_plat_rx,
-  output io_plat_tx,
+         io_pins_rx,
+  output io_pins_tx,
          io_ledr,
          io_ledg,
          io_pwm_pmod1a1,
@@ -517,8 +517,8 @@ module top(
   Top wrappedModule (
     .clock          (_clk_gb_GLOBAL_BUFFER_OUTPUT),
     .reset          (~_GEN | ~io_ubtn),
-    .io_plat_rx     (io_plat_rx),
-    .io_plat_tx     (io_plat_tx),
+    .io_pins_rx     (io_pins_rx),
+    .io_pins_tx     (io_pins_tx),
     .io_ledr        (io_ledr),
     .io_pwm_pmod1a1 (io_pwm_pmod1a1),
     .io_pwm_pmod1a2 (io_pwm_pmod1a2),

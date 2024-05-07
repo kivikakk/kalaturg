@@ -17,7 +17,7 @@ class TXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.io.bits.poke("b10101100".U)
       c.io.valid.poke(true.B)
 
-      c.platIo.expect(true.B)
+      c.pinIo.expect(true.B)
       c.io.ready.expect(true.B)
 
       c.clock.step()
@@ -28,7 +28,7 @@ class TXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
         bit <- Seq(0, 1, 0, 1, 0, 1, 1, 0, 0, 1)
         i   <- 0 until 3
       } {
-        c.platIo.expect((bit == 1).B)
+        c.pinIo.expect((bit == 1).B)
         c.clock.step()
       }
     }

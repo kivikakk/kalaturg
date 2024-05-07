@@ -19,11 +19,11 @@ import ee.hrzn.kivikakk.sb.ICE40Top
 // - Look into `DontCare`.
 
 class TopIO extends Bundle {
-  val plat = new uart.IO
+  val pins = new uart.PinsIO
   val ledr = Output(Bool())
   val ledg = Output(Bool())
 
-  val pwm = noPrefix(new PWMIO)
+  val pwm = new PWMIO
 }
 
 class Top(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed)
@@ -44,18 +44,18 @@ class Top(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed)
   io.ledg := false.B
 
   private val uart = Module(new UART(baud = baud))
-  io.plat <> uart.platIo
+  io.pins :<>= uart.pinsIo
 
   uart.txIo.bits  := uart.rxIo.bits.byte
   uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
   uart.rxIo.ready := uart.txIo.ready
 
   private val pwm = Module(new PWM)
-  pwm.io <> io.pwm
+  io.pwm :<>= pwm.io
 }
 
 object Top extends App {
-  def apply(baud: Int = 115_200)(implicit clockSpeed: ClockSpeed): RawModule =
+  def apply(baud: Int = 230_400)(implicit clockSpeed: ClockSpeed): RawModule =
     ICE40Top(new Top(baud = baud))
 
   private val firtoolOpts = Array(

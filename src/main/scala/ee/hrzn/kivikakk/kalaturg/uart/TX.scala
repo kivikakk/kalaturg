@@ -4,8 +4,8 @@ import chisel3._
 import chisel3.util._
 
 class TX(private val divisor: Int) extends Module {
-  val io     = IO(Flipped(Decoupled(UInt(8.W))))
-  val platIo = IO(Output(Bool()))
+  val io    = IO(Flipped(Decoupled(UInt(8.W))))
+  val pinIo = IO(Output(Bool()))
 
   object State extends ChiselEnum {
     val sIdle, sTx = Value
@@ -16,7 +16,7 @@ class TX(private val divisor: Int) extends Module {
   private val counterReg = RegInit(0.U(unsignedBitLength(9).W))
   private val shiftReg   = RegInit(0.U(10.W))
 
-  platIo   := true.B
+  pinIo    := true.B
   io.ready := false.B
 
   switch(state) {
@@ -30,7 +30,7 @@ class TX(private val divisor: Int) extends Module {
       }
     }
     is(State.sTx) {
-      platIo   := shiftReg(9)
+      pinIo    := shiftReg(9)
       timerReg := timerReg - 1.U // TODO: cheaper here or top level?
       when(timerReg === 0.U) {
         timerReg   := (divisor - 1).U

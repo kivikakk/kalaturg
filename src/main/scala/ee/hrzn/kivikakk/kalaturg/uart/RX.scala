@@ -5,10 +5,10 @@ import chisel3.experimental.BundleLiterals._
 import chisel3.util._
 
 class RX(private val divisor: Int) extends Module {
-  val io     = IO(Decoupled(new RXOut))
-  val platIo = IO(Input(Bool()))
+  val io    = IO(Decoupled(new RXOut))
+  val pinIo = IO(Input(Bool()))
 
-  private val syncedPlatIo = RegNext(RegNext(platIo, true.B), true.B)
+  private val syncedPinIo = RegNext(RegNext(pinIo, true.B), true.B)
 
   private val validReg = RegInit(false.B)
   io.valid := validReg
@@ -41,7 +41,7 @@ class RX(private val divisor: Int) extends Module {
 
   switch(state) {
     is(State.sIdle) {
-      when(!syncedPlatIo) {
+      when(!syncedPinIo) {
         timerReg   := (divisor >> 1).U
         counterReg := 9.U
         state      := State.sRx
@@ -52,7 +52,7 @@ class RX(private val divisor: Int) extends Module {
       when(timerReg === 0.U) {
         timerReg   := (divisor - 1).U
         counterReg := counterReg - 1.U
-        shiftReg   := shiftReg(8, 0) ## syncedPlatIo
+        shiftReg   := shiftReg(8, 0) ## syncedPinIo
 
         when(counterReg === 0.U) {
           state := State.sFinish
