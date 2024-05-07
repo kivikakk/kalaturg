@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 
 class ICE40Top[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
-    clockSpeed: ClockSpeed,
+    platform: Platform,
 ) extends RawModule {
   override def desiredName = "top"
 
@@ -14,7 +14,7 @@ class ICE40Top[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
   clk_gb.USER_SIGNAL_TO_GLOBAL_BUFFER := clki
   private val clk = clk_gb.GLOBAL_BUFFER_OUTPUT
 
-  private val timerLimit = (15e-6 * clockSpeed.hz).toInt
+  private val timerLimit = (15e-6 * platform.clockHz).toInt
   private val resetTimerReg =
     withClock(clk)(Reg(UInt(unsignedBitLength(timerLimit).W)))
   private val reset = Wire(Bool())
@@ -35,6 +35,6 @@ class ICE40Top[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
 
 object ICE40Top {
   def apply[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
-      clockSpeed: ClockSpeed,
+      platform: Platform,
   ) = new ICE40Top(genTop)
 }

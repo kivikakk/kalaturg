@@ -1,6 +1,3 @@
-SV_IN = Top.sv
-PCF_IN = Top.pcf
-
 BASENAME = Top
 BUILD_DIR = build
 ARTIFACT_PREFIX = $(BUILD_DIR)/$(BASENAME)
@@ -33,14 +30,14 @@ ice40-prog: $(ARTIFACT_PREFIX).bin
 $(ARTIFACT_PREFIX).bin: $(ARTIFACT_PREFIX).asc
 	icepack $< $@
 
-$(ARTIFACT_PREFIX).asc: $(ARTIFACT_PREFIX).json $(PCF_IN)
+$(ARTIFACT_PREFIX).asc: $(ARTIFACT_PREFIX).json $(BASENAME)-ice40.pcf
 	nextpnr-ice40 -q --log $(ARTIFACT_PREFIX).tim \
 		--up5k --package sg48 \
 		--json $(ARTIFACT_PREFIX).json \
-		--pcf $(PCF_IN) \
+		--pcf $(BASENAME)-ice40.pcf \
 		--asc $@
 
-$(ARTIFACT_PREFIX).json: $(SV_IN)
+$(ARTIFACT_PREFIX).json: $(BASENAME)-ice40.sv
 	yosys -q -g -l $(ARTIFACT_PREFIX).rpt -p ' \
 		read_verilog -sv $< ;\
 		synth_ice40 -top top ;\
@@ -61,7 +58,7 @@ $(BUILD_DIR)/%.o: */%.cc
 		-I$(shell yosys-config --datdir)/include/backends/cxxrtl/runtime \
 		-c $< -o $@
 
-$(CXXSIM_CC): $(SV_IN)
+$(CXXSIM_CC): $(BASENAME)-cxxrtl.sv
 	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt -p '\
 		read_verilog -sv $< ;\
 		write_cxxrtl -header $@ ;\

@@ -1,9 +1,10 @@
 package ee.hrzn.kivikakk.sb
 
 import chisel3._
+import ee.hrzn.kivikakk.sb.Platform
 
-class CXXRTLTop[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
-    clockSpeed: ClockSpeed,
+class GenericTop[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
+    platform: Platform,
 ) extends Module {
   override def desiredName = "top"
 
@@ -12,8 +13,8 @@ class CXXRTLTop[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
   io :<>= top.io.as[Data]
 }
 
-object CXXRTLTop {
+object GenericTop {
   def apply[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
-      clockSpeed: ClockSpeed,
-  ) = new CXXRTLTop(genTop)
+      platform: Platform,
+  ) = new GenericTop(genTop)
 }

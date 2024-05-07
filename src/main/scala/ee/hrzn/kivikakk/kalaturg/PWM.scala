@@ -2,7 +2,7 @@ package ee.hrzn.kivikakk.kalaturg
 
 import chisel3._
 import chisel3.util._
-import ee.hrzn.kivikakk.sb.ClockSpeed
+import ee.hrzn.kivikakk.sb.Platform
 
 class PWMIO extends Bundle {
   val pmod1a1 = Output(Bool())
@@ -10,7 +10,7 @@ class PWMIO extends Bundle {
   val pmod1a3 = Output(Bool())
 }
 
-class PWM(implicit clockSpeed: ClockSpeed) extends Module {
+class PWM(implicit platform: Platform) extends Module {
   val io = IO(new PWMIO)
 
   // Produces a square wave over period `period` cycles with duty `din/period`.
@@ -21,10 +21,8 @@ class PWM(implicit clockSpeed: ClockSpeed) extends Module {
   }
 
   // Assumes 1024Hz period to simplify things.
-  private def pwmValue(value: UInt, potency: Double = 1.0)(implicit
-      clockSpeed: ClockSpeed,
-  ) = {
-    val period  = clockSpeed.hz / 1024
+  private def pwmValue(value: UInt, potency: Double = 1.0) = {
+    val period  = platform.clockHz / 1024
     val element = ((period / 255).toDouble * potency).toInt
     pwm(period, value * element.U)
   }

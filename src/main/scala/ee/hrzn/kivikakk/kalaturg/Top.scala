@@ -7,11 +7,13 @@ import chisel3.experimental.noPrefix
 import chisel3.util._
 import ee.hrzn.kivikakk.kalaturg.uart.UART
 import ee.hrzn.kivikakk.sb.CXXRTLPlatform
-import ee.hrzn.kivikakk.sb.ClockSpeed
+import ee.hrzn.kivikakk.sb.ElaboratablePlatform
 import ee.hrzn.kivikakk.sb.HasIO
 import ee.hrzn.kivikakk.sb.ICE40Platform
 import ee.hrzn.kivikakk.sb.ICE40Top
 import ee.hrzn.kivikakk.sb.Platform
+
+import java.io.PrintWriter
 
 // Notes:
 // - Buttons and LEDs are active-low.
@@ -29,7 +31,7 @@ class TopIO extends Bundle {
   val pwm = new PWMIO
 }
 
-class Top(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed)
+class Top(val baud: Int = 9600)(implicit platform: Platform)
     extends Module
     with HasIO[TopIO] {
   def createIo() = new TopIO
@@ -60,7 +62,7 @@ class Top(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed)
 object Top extends App {
   def apply(
       baud: Int = 230_400,
-  )(implicit clockSpeed: ClockSpeed, platform: Platform) =
+  )(implicit platform: ElaboratablePlatform) =
     platform(new Top(baud = baud))
 
   private val firtoolOpts = Array(
@@ -68,7 +70,15 @@ object Top extends App {
     "-disable-all-randomization",
     "-strip-debug-info",
   )
-  implicit private val platform: Platform     = CXXRTLPlatform
-  implicit private val clockSpeed: ClockSpeed = ClockSpeed(12_000_000)
-  ChiselStage.emitSystemVerilogFile(Top(), firtoolOpts = firtoolOpts)
+  for { platform <- Seq(CXXRTLPlatform, ICE40Platform) } {
+    val verilog = ChiselStage.emitSystemVerilog(
+      Top()(platform = platform),
+      firtoolOpts = firtoolOpts,
+    )
+    new PrintWriter(s"Top-${platform.id}.sv", "utf-8") {
+      try
+        write(verilog)
+      finally close()
+    }
+  }
 }

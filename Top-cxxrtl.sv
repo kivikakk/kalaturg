@@ -15,12 +15,12 @@ module RX(
   reg  [7:0]      bitsReg_byte;
   reg             bitsReg_err;
   reg  [1:0]      state;
-  reg  [5:0]      timerReg;
+  reg  [3:0]      timerReg;
   reg  [3:0]      counterReg;
   reg  [9:0]      shiftReg;
   wire            _GEN = state == 2'h0;
   wire            _GEN_0 = state == 2'h1;
-  wire            _GEN_1 = timerReg == 6'h0;
+  wire            _GEN_1 = timerReg == 4'h0;
   wire            _GEN_2 = _GEN_0 & _GEN_1;
   wire            _GEN_3 = state == 2'h2;
   wire            _GEN_4 = _GEN | _GEN_0;
@@ -37,7 +37,7 @@ module RX(
       bitsReg_byte <= 8'h0;
       bitsReg_err <= 1'h0;
       state <= 2'h0;
-      timerReg <= 6'h0;
+      timerReg <= 4'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
@@ -59,16 +59,16 @@ module RX(
         if (syncedPinIo) begin
         end
         else begin
-          timerReg <= 6'h1A;
+          timerReg <= 4'h6;
           counterReg <= 4'h9;
         end
       end
       else begin
         if (_GEN_0) begin
           if (_GEN_1)
-            timerReg <= 6'h33;
+            timerReg <= 4'hC;
           else
-            timerReg <= timerReg - 6'h1;
+            timerReg <= timerReg - 4'h1;
         end
         if (_GEN_2)
           counterReg <= counterReg - 4'h1;
@@ -173,23 +173,23 @@ module TX(
 );
 
   reg        state;
-  reg  [5:0] timerReg;
+  reg  [3:0] timerReg;
   reg  [3:0] counterReg;
   reg  [9:0] shiftReg;
-  wire       _GEN = timerReg == 6'h0;
+  wire       _GEN = timerReg == 4'h0;
   always @(posedge clock) begin
     if (reset) begin
       state <= 1'h0;
-      timerReg <= 6'h0;
+      timerReg <= 4'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
     else if (state) begin
       state <= ~(state & _GEN & counterReg == 4'h0) & state;
       if (_GEN)
-        timerReg <= 6'h33;
+        timerReg <= 4'hC;
       else
-        timerReg <= timerReg - 6'h1;
+        timerReg <= timerReg - 4'h1;
       if (state & _GEN) begin
         counterReg <= counterReg - 4'h1;
         shiftReg <= {shiftReg[8:0], 1'h0};
@@ -198,7 +198,7 @@ module TX(
     else begin
       state <= io_valid | state;
       if (io_valid) begin
-        timerReg <= 6'h33;
+        timerReg <= 4'hC;
         counterReg <= 4'h9;
         shiftReg <= {1'h0, io_bits, 1'h1};
       end
@@ -355,9 +355,9 @@ module PWM(
   reg  [7:0]      rgbVecReg_0;
   reg  [7:0]      rgbVecReg_1;
   reg  [7:0]      rgbVecReg_2;
-  reg  [13:0]     io_pmod1a1_cntReg;
-  reg  [13:0]     io_pmod1a2_cntReg;
-  reg  [13:0]     io_pmod1a3_cntReg;
+  reg  [11:0]     io_pmod1a1_cntReg;
+  reg  [11:0]     io_pmod1a2_cntReg;
+  reg  [11:0]     io_pmod1a3_cntReg;
   reg  [15:0]     rgbCounterReg;
   reg  [1:0]      elementIxReg;
   reg             incrementingReg;
@@ -373,9 +373,9 @@ module PWM(
       rgbVecReg_0 <= 8'hFF;
       rgbVecReg_1 <= 8'h0;
       rgbVecReg_2 <= 8'h0;
-      io_pmod1a1_cntReg <= 14'h0;
-      io_pmod1a2_cntReg <= 14'h0;
-      io_pmod1a3_cntReg <= 14'h0;
+      io_pmod1a1_cntReg <= 12'h0;
+      io_pmod1a2_cntReg <= 12'h0;
+      io_pmod1a3_cntReg <= 12'h0;
       rgbCounterReg <= 16'h0;
       elementIxReg <= 2'h1;
       incrementingReg <= 1'h1;
@@ -416,23 +416,23 @@ module PWM(
       end
       else
         rgbCounterReg <= rgbCounterReg + 16'h1;
-      if (io_pmod1a1_cntReg == 14'h2DC5)
-        io_pmod1a1_cntReg <= 14'h0;
+      if (io_pmod1a1_cntReg == 12'hB70)
+        io_pmod1a1_cntReg <= 12'h0;
       else
-        io_pmod1a1_cntReg <= io_pmod1a1_cntReg + 14'h1;
-      if (io_pmod1a2_cntReg == 14'h2DC5)
-        io_pmod1a2_cntReg <= 14'h0;
+        io_pmod1a1_cntReg <= io_pmod1a1_cntReg + 12'h1;
+      if (io_pmod1a2_cntReg == 12'hB70)
+        io_pmod1a2_cntReg <= 12'h0;
       else
-        io_pmod1a2_cntReg <= io_pmod1a2_cntReg + 14'h1;
-      if (io_pmod1a3_cntReg == 14'h2DC5)
-        io_pmod1a3_cntReg <= 14'h0;
+        io_pmod1a2_cntReg <= io_pmod1a2_cntReg + 12'h1;
+      if (io_pmod1a3_cntReg == 12'hB70)
+        io_pmod1a3_cntReg <= 12'h0;
       else
-        io_pmod1a3_cntReg <= io_pmod1a3_cntReg + 14'h1;
+        io_pmod1a3_cntReg <= io_pmod1a3_cntReg + 12'h1;
     end
   end // always @(posedge)
-  assign io_pmod1a1 = {1'h0, {5'h0, rgbVecReg_0} * 13'h16} > io_pmod1a1_cntReg;
-  assign io_pmod1a2 = {1'h0, {5'h0, rgbVecReg_1} * 13'h16} > io_pmod1a2_cntReg;
-  assign io_pmod1a3 = {1'h0, {5'h0, rgbVecReg_2} * 13'h16} > io_pmod1a3_cntReg;
+  assign io_pmod1a1 = {1'h0, {3'h0, rgbVecReg_0} * 11'h5} > io_pmod1a1_cntReg;
+  assign io_pmod1a2 = {1'h0, {3'h0, rgbVecReg_1} * 11'h5} > io_pmod1a2_cntReg;
+  assign io_pmod1a3 = {1'h0, {3'h0, rgbVecReg_2} * 11'h5} > io_pmod1a3_cntReg;
 endmodule
 
 module Top(

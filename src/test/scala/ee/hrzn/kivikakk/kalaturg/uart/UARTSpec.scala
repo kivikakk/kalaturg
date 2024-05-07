@@ -3,7 +3,7 @@ package ee.hrzn.kivikakk.kalaturg.uart
 import chisel3._
 import chiseltest._
 import chiseltest.simulator.WriteVcdAnnotation
-import ee.hrzn.kivikakk.sb.ClockSpeed
+import ee.hrzn.kivikakk.sb.Platform
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -12,7 +12,10 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
 
   // These tests are *really* ugly, but they work for now. Need more clarity.
 
-  implicit private val clockSpeed: ClockSpeed = ClockSpeed(hz = 3)
+  implicit private val platform: Platform = new Platform {
+    val id = "uartspec"
+    val clockHz = 3
+  }
 
   it should "receive a byte" in {
     test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
