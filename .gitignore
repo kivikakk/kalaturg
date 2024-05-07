@@ -8,6 +8,7 @@ build/
 *.tim
 
 target/
+test_run_dir/
 
 .metals/
 .bloop/
