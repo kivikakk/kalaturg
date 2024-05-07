@@ -17,7 +17,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   it should "receive a byte" in {
     test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
       // Assert START and hold for one bit.
-      c.platIo.rx.poke(false.B)
+      c.pinsIo.rx.poke(false.B)
 
       c.rxIo.valid.expect(false.B)
 
@@ -29,13 +29,13 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
         bitIx <- 7 to 0 by -1
         i     <- 0 until 3
       } {
-        c.platIo.rx.poke(((input & (1 << bitIx)) != 0).B)
+        c.pinsIo.rx.poke(((input & (1 << bitIx)) != 0).B)
         c.rxIo.valid.expect(false.B)
         c.clock.step()
       }
 
       // Assert STOP and hold for one bit; wait for sync and processing delay (?).
-      c.platIo.rx.poke(true.B)
+      c.pinsIo.rx.poke(true.B)
 
       for { i <- 0 until 7 } {
         c.rxIo.valid.expect(false.B)
@@ -62,17 +62,17 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       c.txIo.bits.poke(input.U)
       c.txIo.valid.poke(true.B)
 
-      c.platIo.tx.expect(true.B)
+      c.pinsIo.tx.expect(true.B)
 
       c.clock.step()
       c.txIo.valid.poke(false.B)
 
-      c.platIo.tx.expect(true.B)
+      c.pinsIo.tx.expect(true.B)
 
       // Watch START.
       for { i <- 0 until 3 } {
         c.clock.step()
-        c.platIo.tx.expect(false.B)
+        c.pinsIo.tx.expect(false.B)
       }
 
       // Check for each bit in turn.
@@ -81,13 +81,13 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
         i     <- 0 until 3
       } {
         c.clock.step()
-        c.platIo.tx.expect(((input & (1 << bitIx)) != 0).B)
+        c.pinsIo.tx.expect(((input & (1 << bitIx)) != 0).B)
       }
 
       // Watch STOP.
       for { i <- 0 until 3 } {
         c.clock.step()
-        c.platIo.tx.expect(true.B)
+        c.pinsIo.tx.expect(true.B)
       }
     }
   }

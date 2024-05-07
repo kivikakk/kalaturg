@@ -20,9 +20,9 @@ class RXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
       i            <- 0 until 3
     } {
       if (forceStart && bitIx == 0 && i == 0) {
-        c.platIo.poke(false.B)
+        c.pinIo.poke(false.B)
       } else {
-        c.platIo.poke((bit == 1).B)
+        c.pinIo.poke((bit == 1).B)
       }
       c.io.valid.expect(false.B)
       c.clock.step()
