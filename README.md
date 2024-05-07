@@ -51,12 +51,14 @@ Done so far:
 * Redo the base UART module using `Queue`.
 * Test it on the iCEBreaker!
 * Mess around with SB_RGBA_DRV. Buffer the clock input with SB_GB.
+* Drop the Python stuff, it's no longer necessary.
 
 WIP/todo:
 
+* Refactor out some key pieces.
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
-  it driving everything through lines from the top. Get it working first with
-  Amaranth, then Chisel.
+  it driving everything through lines from the top. ~~Get it working first with
+  Amaranth, then Chisel.~~
 
 [hdx]: https://hrzn.ee/kivikakk/hdx
 [pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
