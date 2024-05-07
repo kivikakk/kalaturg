@@ -4,17 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.BaseModule
 
-trait HasIO[ContainedIO <: Data] extends BaseModule {
-  def createIo(): ContainedIO
-
-  val io = IO(createIo())
-}
-
-class ICE40Top[
-    WrappedTop <: HasIO[_ <: Data],
-](
-    wrapped: => WrappedTop,
-)(implicit
+class ICE40Top[Top <: HasIO[_ <: Data]](wrapped: => Top)(implicit
     clockSpeed: ClockSpeed,
 ) extends RawModule {
   override def desiredName = "top"
@@ -45,10 +35,9 @@ class ICE40Top[
 }
 
 object ICE40Top {
-  def apply[WrappedTop <: HasIO[_ <: Data]](wrapped: => WrappedTop)(implicit
+  def apply[Top <: HasIO[_ <: Data]](top: => Top)(implicit
       clockSpeed: ClockSpeed,
-  ) =
-    new ICE40Top(wrapped)
+  ) = new ICE40Top(top)
 }
 
 case class ClockSpeed(hz: Int)

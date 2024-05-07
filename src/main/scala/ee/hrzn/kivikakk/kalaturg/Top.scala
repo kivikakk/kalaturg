@@ -6,9 +6,12 @@ import chisel3.experimental.ExtModule
 import chisel3.experimental.noPrefix
 import chisel3.util._
 import ee.hrzn.kivikakk.kalaturg.uart.UART
+import ee.hrzn.kivikakk.sb.CXXRTLPlatform
 import ee.hrzn.kivikakk.sb.ClockSpeed
 import ee.hrzn.kivikakk.sb.HasIO
+import ee.hrzn.kivikakk.sb.ICE40Platform
 import ee.hrzn.kivikakk.sb.ICE40Top
+import ee.hrzn.kivikakk.sb.Platform
 
 // Notes:
 // - Buttons and LEDs are active-low.
@@ -55,14 +58,17 @@ class Top(val baud: Int = 9600)(implicit clockSpeed: ClockSpeed)
 }
 
 object Top extends App {
-  def apply(baud: Int = 230_400)(implicit clockSpeed: ClockSpeed): RawModule =
-    ICE40Top(new Top(baud = baud))
+  def apply(
+      baud: Int = 230_400,
+  )(implicit clockSpeed: ClockSpeed, platform: Platform) =
+    platform(new Top(baud = baud))
 
   private val firtoolOpts = Array(
     "--lowering-options=disallowLocalVariables",
     "-disable-all-randomization",
     "-strip-debug-info",
   )
+  implicit private val platform: Platform     = CXXRTLPlatform
   implicit private val clockSpeed: ClockSpeed = ClockSpeed(12_000_000)
   ChiselStage.emitSystemVerilogFile(Top(), firtoolOpts = firtoolOpts)
 }
