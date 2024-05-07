@@ -25,7 +25,7 @@ class TopIO extends Bundle {
 }
 
 class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopIO] {
-  val io = IO(new TopIO)
+  def createIo() = new TopIO
 
   private val ledReg = RegInit(true.B)
   io.ledr := ledReg
@@ -95,7 +95,7 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopI
 
 object Top extends App {
   def apply(clockHz: Int, baud: Int = 9600): RawModule =
-    new ICE40Top(clockHz, new Top(baud = baud, clockHz = clockHz), new TopIO)
+    new ICE40Top(clockHz, new Top(baud = baud, clockHz = clockHz))
 
   private val firtoolOpts = Array(
     "--lowering-options=disallowLocalVariables",

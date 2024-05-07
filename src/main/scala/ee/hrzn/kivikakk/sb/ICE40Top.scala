@@ -5,16 +5,16 @@ import chisel3.util._
 import chisel3.experimental.BaseModule
 
 trait HasIO[ContainedIO <: Data] extends BaseModule {
-  val io: ContainedIO
+  def createIo(): ContainedIO
+
+  val io = IO(createIo())
 }
 
 class ICE40Top[
-    TopIO <: Data,
-    TopInner <: HasIO[TopIO]
+  TopInner <: HasIO[_ <: Data],
 ](
-    private val clockHz: Int,
-    inner: => TopInner,
-    innerIO: => TopIO,
+  private val clockHz: Int,
+  inner: => TopInner,
 ) extends RawModule {
   override def desiredName = "top"
 
@@ -38,6 +38,6 @@ class ICE40Top[
   private val io_ubtn = IO(Input(new Bool()))
 
   private val innerModule = withClockAndReset(clk, reset | ~io_ubtn)(Module(inner))
-  private val io = IO(innerIO)
+  private val io = IO(innerModule.createIo())
   io <> innerModule.io
 }
