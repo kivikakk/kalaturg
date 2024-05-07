@@ -36,7 +36,7 @@ class ICE40Top[
     resetTimerReg := resetTimerReg + 1.U
   }
 
-  private val io_ubtn = IO(Input(new Bool()))
+  private val io_ubtn = IO(Input(Bool()))
 
   private val wrappedModule = withClockAndReset(clk, reset | ~io_ubtn)(Module(wrapped))
   private val io = IO(wrappedModule.createIo())

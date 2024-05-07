@@ -346,23 +346,14 @@ module UART(
   );
 endmodule
 
-module Top(
+module PWM(
   input  clock,
          reset,
-         io_plat_rx,
-  output io_plat_tx,
-         io_ledr,
-         io_pmod1a1,
+  output io_pmod1a1,
          io_pmod1a2,
          io_pmod1a3
 );
 
-  wire            _uartM_txIo_ready;
-  wire            _uartM_rxIo_valid;
-  wire [7:0]      _uartM_rxIo_bits_byte;
-  wire            _uartM_rxIo_bits_err;
-  reg             ledReg;
-  reg  [22:0]     timerReg;
   reg  [7:0]      rgbVecReg_0;
   reg  [7:0]      rgbVecReg_1;
   reg  [7:0]      rgbVecReg_2;
@@ -379,11 +370,8 @@ module Top(
   wire            _GEN_3 = _GEN_0 != 8'hFF;
   wire [7:0]      _rgbVecReg_T = _GEN_0 + 8'h1;
   wire [7:0]      _rgbVecReg_T_2 = _GEN_0 - 8'h1;
-  wire            _GEN_4 = timerReg == 23'h0;
   always @(posedge clock) begin
     if (reset) begin
-      ledReg <= 1'h1;
-      timerReg <= 23'h2DC6BF;
       rgbVecReg_0 <= 8'hFF;
       rgbVecReg_1 <= 8'h0;
       rgbVecReg_2 <= 8'h0;
@@ -395,11 +383,6 @@ module Top(
       incrementingReg <= 1'h1;
     end
     else begin
-      ledReg <= _GEN_4 ^ ledReg;
-      if (_GEN_4)
-        timerReg <= 23'h5B8D7F;
-      else
-        timerReg <= timerReg - 23'h1;
       if (rgbCounterReg == 16'hB71A) begin
         if (incrementingReg) begin
           if (_GEN_3 & ~(|elementIxReg))
@@ -449,6 +432,42 @@ module Top(
         io_pmod1a3_cntReg <= io_pmod1a3_cntReg + 14'h1;
     end
   end // always @(posedge)
+  assign io_pmod1a1 = {1'h0, {5'h0, rgbVecReg_0} * 13'h16} > io_pmod1a1_cntReg;
+  assign io_pmod1a2 = {1'h0, {5'h0, rgbVecReg_1} * 13'h16} > io_pmod1a2_cntReg;
+  assign io_pmod1a3 = {1'h0, {5'h0, rgbVecReg_2} * 13'h16} > io_pmod1a3_cntReg;
+endmodule
+
+module Top(
+  input  clock,
+         reset,
+         io_plat_rx,
+  output io_plat_tx,
+         io_ledr,
+         io_pwm_pmod1a1,
+         io_pwm_pmod1a2,
+         io_pwm_pmod1a3
+);
+
+  wire        _uartM_txIo_ready;
+  wire        _uartM_rxIo_valid;
+  wire [7:0]  _uartM_rxIo_bits_byte;
+  wire        _uartM_rxIo_bits_err;
+  reg         ledReg;
+  reg  [22:0] timerReg;
+  wire        _GEN = timerReg == 23'h0;
+  always @(posedge clock) begin
+    if (reset) begin
+      ledReg <= 1'h1;
+      timerReg <= 23'h2DC6BF;
+    end
+    else begin
+      ledReg <= _GEN ^ ledReg;
+      if (_GEN)
+        timerReg <= 23'h5B8D7F;
+      else
+        timerReg <= timerReg - 23'h1;
+    end
+  end // always @(posedge)
   UART uartM (
     .clock          (clock),
     .reset          (reset),
@@ -462,10 +481,14 @@ module Top(
     .platIo_rx      (io_plat_rx),
     .platIo_tx      (io_plat_tx)
   );
+  PWM pwm (
+    .clock      (clock),
+    .reset      (reset),
+    .io_pmod1a1 (io_pwm_pmod1a1),
+    .io_pmod1a2 (io_pwm_pmod1a2),
+    .io_pmod1a3 (io_pwm_pmod1a3)
+  );
   assign io_ledr = ledReg;
-  assign io_pmod1a1 = {1'h0, {5'h0, rgbVecReg_0} * 13'h16} > io_pmod1a1_cntReg;
-  assign io_pmod1a2 = {1'h0, {5'h0, rgbVecReg_1} * 13'h16} > io_pmod1a2_cntReg;
-  assign io_pmod1a3 = {1'h0, {5'h0, rgbVecReg_2} * 13'h16} > io_pmod1a3_cntReg;
 endmodule
 
 module top(
@@ -475,9 +498,9 @@ module top(
   output io_plat_tx,
          io_ledr,
          io_ledg,
-         io_pmod1a1,
-         io_pmod1a2,
-         io_pmod1a3
+         io_pwm_pmod1a1,
+         io_pwm_pmod1a2,
+         io_pwm_pmod1a3
 );
 
   wire       _clk_gb_GLOBAL_BUFFER_OUTPUT;
@@ -492,14 +515,14 @@ module top(
     .GLOBAL_BUFFER_OUTPUT         (_clk_gb_GLOBAL_BUFFER_OUTPUT)
   );
   Top wrappedModule (
-    .clock      (_clk_gb_GLOBAL_BUFFER_OUTPUT),
-    .reset      (~_GEN | ~io_ubtn),
-    .io_plat_rx (io_plat_rx),
-    .io_plat_tx (io_plat_tx),
-    .io_ledr    (io_ledr),
-    .io_pmod1a1 (io_pmod1a1),
-    .io_pmod1a2 (io_pmod1a2),
-    .io_pmod1a3 (io_pmod1a3)
+    .clock          (_clk_gb_GLOBAL_BUFFER_OUTPUT),
+    .reset          (~_GEN | ~io_ubtn),
+    .io_plat_rx     (io_plat_rx),
+    .io_plat_tx     (io_plat_tx),
+    .io_ledr        (io_ledr),
+    .io_pwm_pmod1a1 (io_pwm_pmod1a1),
+    .io_pwm_pmod1a2 (io_pwm_pmod1a2),
+    .io_pwm_pmod1a3 (io_pwm_pmod1a3)
   );
   assign io_ledg = 1'h0;
 endmodule
