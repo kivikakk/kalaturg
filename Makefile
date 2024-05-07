@@ -2,6 +2,8 @@ BASENAME = Top
 BUILD_DIR = build
 ARTIFACT_PREFIX = $(BUILD_DIR)/$(BASENAME)
 
+SCALA_SRCS = $(shell find src/main/scala)
+
 CXXSIM_EXE = $(BUILD_DIR)/cxxsim
 CXXSIM_CC = $(ARTIFACT_PREFIX).cc
 CXXSIM_SRCS = $(CXXSIM_CC) $(wildcard cxxsim/*.cc)
@@ -21,6 +23,9 @@ all:
 
 clean:
 	-rm build/*
+
+$(BASENAME)-%.sv: $(SCALA_SRCS)
+	sbt run
 
 ice40: $(ARTIFACT_PREFIX).bin
 	
