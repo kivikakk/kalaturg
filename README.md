@@ -52,10 +52,11 @@ Done so far:
 * Test it on the iCEBreaker!
 * Mess around with SB_RGBA_DRV. Buffer the clock input with SB_GB.
 * Drop the Python stuff, it's no longer necessary.
+* Refactor out some key pieces.
 
 WIP/todo:
 
-* Refactor out some key pieces.
+* Actions CI.
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
   it driving everything through lines from the top. ~~Get it working first with
   Amaranth, then Chisel.~~
