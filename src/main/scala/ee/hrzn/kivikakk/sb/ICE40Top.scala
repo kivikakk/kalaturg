@@ -2,9 +2,8 @@ package ee.hrzn.kivikakk.sb
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.BaseModule
 
-class ICE40Top[Top <: HasIO[_ <: Data]](wrapped: => Top)(implicit
+class ICE40Top[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
     clockSpeed: ClockSpeed,
 ) extends RawModule {
   override def desiredName = "top"
@@ -28,16 +27,14 @@ class ICE40Top[Top <: HasIO[_ <: Data]](wrapped: => Top)(implicit
   }
   private val io_ubtn = IO(Input(Bool()))
 
-  private val wrappedModule =
-    withClockAndReset(clk, reset | ~io_ubtn)(Module(wrapped))
-  private val io = IO(wrappedModule.createIo())
-  io :<>= wrappedModule.io.as[Data]
+  private val top =
+    withClockAndReset(clk, reset | ~io_ubtn)(Module(genTop))
+  private val io = IO(top.createIo())
+  io :<>= top.io.as[Data]
 }
 
 object ICE40Top {
-  def apply[Top <: HasIO[_ <: Data]](top: => Top)(implicit
+  def apply[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
       clockSpeed: ClockSpeed,
-  ) = new ICE40Top(top)
+  ) = new ICE40Top(genTop)
 }
-
-case class ClockSpeed(hz: Int)

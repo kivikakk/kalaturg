@@ -17,5 +17,5 @@ case object ICE40Platform extends Platform {
 case object CXXRTLPlatform extends Platform {
   override def apply[Top <: HasIO[_ <: Data]](top: => Top)(implicit
       clockSpeed: ClockSpeed,
-  ) = top
+  ) = CXXRTLTop(top)
 }

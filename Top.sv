@@ -441,7 +441,6 @@ module Top(
          io_pins_rx,
   output io_pins_tx,
          io_ledr,
-         io_ledg,
          io_pwm_pmod1a1,
          io_pwm_pmod1a2,
          io_pwm_pmod1a3
@@ -488,6 +487,30 @@ module Top(
     .io_pmod1a3 (io_pwm_pmod1a3)
   );
   assign io_ledr = ledReg;
+endmodule
+
+module top(
+  input  clock,
+         reset,
+         io_pins_rx,
+  output io_pins_tx,
+         io_ledr,
+         io_ledg,
+         io_pwm_pmod1a1,
+         io_pwm_pmod1a2,
+         io_pwm_pmod1a3
+);
+
+  Top top (
+    .clock          (clock),
+    .reset          (reset),
+    .io_pins_rx     (io_pins_rx),
+    .io_pins_tx     (io_pins_tx),
+    .io_ledr        (io_ledr),
+    .io_pwm_pmod1a1 (io_pwm_pmod1a1),
+    .io_pwm_pmod1a2 (io_pwm_pmod1a2),
+    .io_pwm_pmod1a3 (io_pwm_pmod1a3)
+  );
   assign io_ledg = 1'h0;
 endmodule
 

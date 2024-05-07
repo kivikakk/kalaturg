@@ -5,7 +5,7 @@
 
 Bench::Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd):
   _top(top),
-  _uart(9600, top.p_io__rx, top.p_io__tx),
+  _uart(9600, top.p_io__pins__rx, top.p_io__pins__tx),
   _vcd(vcd),
   _vcd_time(0)
 {}

@@ -2,13 +2,16 @@ SV_IN = Top.sv
 PCF_IN = Top.pcf
 
 BASENAME = Top
-BUILD_PREFIX = build/
-ARTIFACT_PREFIX = $(BUILD_PREFIX)$(BASENAME)
+BUILD_DIR = build
+ARTIFACT_PREFIX = $(BUILD_DIR)/$(BASENAME)
 
-CXXSIM_EXE = $(BUILD_PREFIX)cxxsim
+CXXSIM_EXE = $(BUILD_DIR)/cxxsim
 CXXSIM_CC = $(ARTIFACT_PREFIX).cc
 CXXSIM_SRCS = $(CXXSIM_CC) $(wildcard cxxsim/*.cc)
-CXXSIM_OBJS = $(subst cxxsim/,$(BUILD_PREFIX),$(patsubst %.cc,%.o,$(CXXSIM_SRCS)))
+CXXSIM_OBJS = $(subst cxxsim/,$(BUILD_DIR)/,$(patsubst %.cc,%.o,$(CXXSIM_SRCS)))
+CXXSIM_OPTS = -std=c++17 -g -Wall -pedantic -Wno-zero-length-array
+# -O3 makes a huge difference to running time.
+# -fsanitize=address -fno-omit-frame-pointer for extra de🐞.
 
 .PHONY: ice40-prog cxxsim clean
 
@@ -50,10 +53,13 @@ cxxsim: $(CXXSIM_EXE)
 $(CXXSIM_EXE): $(CXXSIM_CC) $(CXXSIM_OBJS)
 
 $(CXXSIM_EXE):
-	$(CXX) $(OPT_ARGS) $(CXXSIM_OBJS) -o $@
+	$(CXX) $(CXXSIM_OPTS) $(CXXSIM_OBJS) -o $@
 
-$(BUILD_PREFIX)%.o: %.cc
-	echo $< $@
+$(BUILD_DIR)/%.o: */%.cc
+	$(CXX) $(CXXSIM_OPTS) -DCLOCK_NAME=clock \
+		-I$(BUILD_DIR) \
+		-I$(shell yosys-config --datdir)/include/backends/cxxrtl/runtime \
+		-c $< -o $@
 
 $(CXXSIM_CC): $(SV_IN)
 	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt -p '\

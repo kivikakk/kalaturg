@@ -2,7 +2,7 @@
 #define BENCH_H
 
 #include <cxxrtl/cxxrtl_vcd.h>
-#include <kalaturg.h>
+#include <Top.h>
 
 #include "uart.h"
 

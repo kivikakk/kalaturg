@@ -54,6 +54,7 @@ Done so far:
 * Drop the Python stuff, it's no longer necessary.
 * Refactor out some key pieces.
 * Actions CI for unit tests.
+* Introduce a "Platform" notion to build separately for iCE40 and CXXRTL.
 
 WIP/todo:
 

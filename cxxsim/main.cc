@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <cxxrtl/cxxrtl_vcd.h>
-#include <kalaturg.h>
+#include <Top.h>
 
 #include "simassert.h"
 #include "bench.h"
