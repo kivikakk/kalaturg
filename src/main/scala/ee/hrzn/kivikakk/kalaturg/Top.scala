@@ -5,6 +5,7 @@ import chisel3.experimental.ExtModule
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
 import ee.hrzn.kivikakk.sb.{ICE40Top, HasIO}
+import ee.hrzn.kivikakk.sb.ClockSpeed
 
 // Notes:
 // - Buttons and LEDs are active-low.
@@ -94,13 +95,14 @@ class Top(val baud: Int = 9600, val clockHz: Int) extends Module with HasIO[TopI
 }
 
 object Top extends App {
-  def apply(clockHz: Int, baud: Int = 9600): RawModule =
-    new ICE40Top(clockHz, new Top(baud = baud, clockHz = clockHz))
+  def apply(baud: Int = 9600)(implicit clockSpeed: ClockSpeed): RawModule =
+    ICE40Top(new Top(baud = baud, clockHz = clockSpeed.clockHz))
 
   private val firtoolOpts = Array(
     "--lowering-options=disallowLocalVariables",
     "-disable-all-randomization",
     "-strip-debug-info",
   )
-  ChiselStage.emitSystemVerilogFile(Top(12_000_000), firtoolOpts = firtoolOpts)
+  implicit private val clockSpeed: ClockSpeed = ClockSpeed(12_000_000)
+  ChiselStage.emitSystemVerilogFile(Top(), firtoolOpts = firtoolOpts)
 }

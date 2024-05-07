@@ -41,3 +41,10 @@ class ICE40Top[
   private val io = IO(innerModule.createIo())
   io <> innerModule.io
 }
+
+object ICE40Top {
+  def apply[TopInner <: HasIO[_ <: Data]](inner: => TopInner)(implicit clockSpeed: ClockSpeed) =
+    new ICE40Top(clockSpeed.clockHz, inner)
+}
+
+case class ClockSpeed(clockHz: Int)
