@@ -1,4 +1,5 @@
 name: update dependency graph
+
 on:
   push:
     branches:
@@ -25,5 +26,5 @@ jobs:
       run: sbt publishLocal
 
     - name: Checkout this
-    - uses: actions/checkout@v4
+      uses: actions/checkout@v4
     - uses: scalacenter/sbt-dependency-submission@v2
