@@ -63,12 +63,12 @@ WIP/todo:
   it driving everything through lines from the top. ~~Get it working first with
   Amaranth, then Chisel.~~
 
-[hdx]: https://hrzn.ee/kivikakk/hdx
-[pdm-backend package]: https://hrzn.ee/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
-[basic cxxsim support]: https://hrzn.ee/kivikakk/hdx/commit/d52075e49ac05a7297b8ed8cd6cdd8a2808e72b0
-[i2c_obs]: https://hrzn.ee/kivikakk/i2c_obs
-[sh1107]: https://hrzn.ee/kivikakk/sh1107
-[UART echo]: https://hrzn.ee/kivikakk/kalaturg/commit/cd7b97cfb697ac7def0d5d0689da9c03f403d3e0
-[with CXXRTL]: https://hrzn.ee/kivikakk/kalaturg/commit/d4c853a680c494fe9acc36aa91b83a7cd2d4d026
-[Chisel Top]: https://hrzn.ee/kivikakk/kalaturg/commit/35a791d597e0f31a2affda72a9de2c3f21161e36
-[done]: https://hrzn.ee/kivikakk/kalaturg/commit/9d704aa2968ab3d287fe23ccfad2bdf26a88d5e3
+[hdx]: https://github.com/kivikakk/hdx
+[pdm-backend package]: https://github.com/kivikakk/hdx/commit/27c3609f5b90e97ed89ca11a7e5747d4b8d0d90b#diff-14a0b9fe455f18efa8eb5b66ab3f4818d6ef7c32
+[basic cxxsim support]: https://github.com/kivikakk/hdx/commit/d52075e49ac05a7297b8ed8cd6cdd8a2808e72b0
+[i2c_obs]: https://github.com/kivikakk/i2c_obs
+[sh1107]: https://github.com/kivikakk/sh1107
+[UART echo]: https://github.com/kivikakk/kalaturg/commit/cd7b97cfb697ac7def0d5d0689da9c03f403d3e0
+[with CXXRTL]: https://github.com/kivikakk/kalaturg/commit/d4c853a680c494fe9acc36aa91b83a7cd2d4d026
+[Chisel Top]: https://github.com/kivikakk/kalaturg/commit/35a791d597e0f31a2affda72a9de2c3f21161e36
+[done]: https://github.com/kivikakk/kalaturg/commit/9d704aa2968ab3d287fe23ccfad2bdf26a88d5e3
