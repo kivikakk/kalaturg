@@ -20,6 +20,10 @@ jobs:
         java-version: '22'
         distribution: 'temurin'
         cache: 'sbt'
+    - name: Install LLVM 16
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "16.0"
     - name: Install OSS CAD Suite
       uses: YosysHQ/setup-oss-cad-suite@v3
     - run: yosys --version
