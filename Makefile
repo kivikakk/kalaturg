@@ -44,11 +44,10 @@ $(ARTIFACT_PREFIX).asc: $(ARTIFACT_PREFIX).json $(BASENAME)-ice40.pcf
 
 $(ARTIFACT_PREFIX).json: $(BASENAME)-ice40.sv
 	@mkdir -p $(BUILD_DIR)
-	yosys -q -g -l $(ARTIFACT_PREFIX).rpt -p ' \
-		read_verilog -sv $< ;\
-		synth_ice40 -top top ;\
-		write_json $@ ;\
-	'
+	yosys -q -g -l $(ARTIFACT_PREFIX).rpt \
+		-p 'read_verilog -sv $<' \
+		-p 'synth_ice40 -top top' \
+		-p 'write_json $@'
 
 cxxsim: $(CXXSIM_EXE)
 	$<
@@ -67,7 +66,6 @@ $(BUILD_DIR)/%.o: */%.cc
 
 $(CXXSIM_CC): $(BASENAME)-cxxrtl.sv
 	@mkdir -p $(BUILD_DIR)
-	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt -p '\
-		read_verilog -sv $< ;\
-		write_cxxrtl -header $@ ;\
-	'
+	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt \
+		-p 'read_verilog -sv $<' \
+		-p 'write_cxxrtl -header $@'
