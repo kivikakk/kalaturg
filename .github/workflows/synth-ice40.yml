@@ -1,0 +1,28 @@
+name: Unit tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 22
+      uses: actions/setup-java@v4
+      with:
+        java-version: '22'
+        distribution: 'temurin'
+        cache: 'sbt'
+    - name: Install Yosys and nextpnr
+      run: apt-get install yosys nextpnr-ice40
+    - name: Elaborate
+      run: sbt run
+    - name: Synthesise
+      run: make ice40
