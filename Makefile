@@ -8,7 +8,7 @@ CXXSIM_EXE = $(BUILD_DIR)/cxxsim
 CXXSIM_CC = $(ARTIFACT_PREFIX).cc
 CXXSIM_SRCS = $(CXXSIM_CC) $(wildcard cxxsim/*.cc)
 CXXSIM_OBJS = $(subst cxxsim/,$(BUILD_DIR)/,$(patsubst %.cc,%.o,$(CXXSIM_SRCS)))
-CXXSIM_OPTS = -std=c++17 -stdlib=libc++ -g -Wall -pedantic -Wno-zero-length-array
+CXXSIM_OPTS = -std=c++14 -g -Wall -pedantic -Wno-zero-length-array
 # -O3 makes a huge difference to running time.
 # -fsanitize=address -fno-omit-frame-pointer for extra de🐞.
 

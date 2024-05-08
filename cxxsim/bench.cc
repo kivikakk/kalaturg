@@ -66,9 +66,8 @@ int Bench::run()
 
   simassert(_uart.rx_state() == UART::rx_idle, "rx still busy?");
 
-  auto maybe_output = _uart.rx_read();
-  simassert(maybe_output.has_value(), "rx empty");
-  uint8_t output = *maybe_output;
+  uint8_t output;
+  simassert(_uart.rx_read(&output), "rx empty");
 
   std::cout << "output: " << eight_bit_byte{output} << std::endl;
   simassert(output == inputs.front(), "output differed from input");
@@ -85,9 +84,7 @@ int Bench::run()
       cycle();
     simassert(_uart.rx_state() == UART::rx_idle, "didn't return to idle");
 
-    auto maybe_output = _uart.rx_read();
-    simassert(maybe_output.has_value(), "rx empty");
-    uint8_t output = *maybe_output;
+    simassert(_uart.rx_read(&output), "rx empty");
 
     std::cout << "output: " << eight_bit_byte{output} << std::endl;
     simassert(output == inputs.front(), "output differed from input");
