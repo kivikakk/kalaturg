@@ -57,6 +57,7 @@ Done so far:
 * Introduce a "Platform" notion to build separately for iCE40 and CXXRTL.
 * Actions CI for cxxsim, synthesis.
 * Split off the refactored stuff.
+* Okay now [_really_ split it off][chryse].
 
 WIP/todo:
 
@@ -73,3 +74,4 @@ WIP/todo:
 [with CXXRTL]: https://github.com/kivikakk/kalaturg/commit/d4c853a680c494fe9acc36aa91b83a7cd2d4d026
 [Chisel Top]: https://github.com/kivikakk/kalaturg/commit/35a791d597e0f31a2affda72a9de2c3f21161e36
 [done]: https://github.com/kivikakk/kalaturg/commit/9d704aa2968ab3d287fe23ccfad2bdf26a88d5e3
+[chryse]: https://github.com/kivikakk/chryse
