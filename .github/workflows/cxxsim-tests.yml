@@ -26,4 +26,4 @@ jobs:
     - name: Elaborate
       run: sbt run
     - name: Run cxxsim tests
-      run: make cxxsim CXX=clang++
+      run: make -j4 cxxsim CXX=clang++
