@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 22
@@ -20,14 +20,10 @@ jobs:
         java-version: '22'
         distribution: 'temurin'
         cache: 'sbt'
-    - name: Install LLVM 16
-      uses: KyleMayes/install-llvm-action@v2
-      with:
-        version: "16.0"
     - name: Install OSS CAD Suite
       uses: YosysHQ/setup-oss-cad-suite@v3
     - run: yosys --version
     - name: Elaborate
       run: sbt run
     - name: Run cxxsim tests
-      run: make cxxsim
+      run: make cxxsim CXX=clang++
