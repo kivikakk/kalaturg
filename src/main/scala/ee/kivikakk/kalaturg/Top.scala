@@ -1,4 +1,4 @@
-package ee.hrzn.kivikakk.kalaturg
+package ee.kivikakk.kalaturg
 
 import _root_.circt.stage.ChiselStage
 import chisel3._
@@ -11,7 +11,7 @@ import ee.hrzn.chryse.platform.Platform
 import ee.hrzn.chryse.platform.cxxrtl.CXXRTLPlatform
 import ee.hrzn.chryse.platform.ice40.ICE40Platform
 import ee.hrzn.chryse.platform.ice40.ICE40Top
-import ee.hrzn.kivikakk.kalaturg.uart.UART
+import ee.kivikakk.kalaturg.uart.UART
 
 import java.io.PrintWriter
 

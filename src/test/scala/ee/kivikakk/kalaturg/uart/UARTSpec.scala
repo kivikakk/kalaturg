@@ -1,4 +1,4 @@
-package ee.hrzn.kivikakk.kalaturg.uart
+package ee.kivikakk.kalaturg.uart
 
 import chisel3._
 import chiseltest._

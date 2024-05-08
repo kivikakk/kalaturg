@@ -56,6 +56,7 @@ Done so far:
 * Actions CI for unit tests.
 * Introduce a "Platform" notion to build separately for iCE40 and CXXRTL.
 * Actions CI for cxxsim, synthesis.
+* Split off the refactored stuff.
 
 WIP/todo:
 

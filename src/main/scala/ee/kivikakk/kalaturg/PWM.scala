@@ -1,4 +1,4 @@
-package ee.hrzn.kivikakk.kalaturg
+package ee.kivikakk.kalaturg
 
 import chisel3._
 import chisel3.util._
