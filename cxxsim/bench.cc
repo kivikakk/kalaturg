@@ -3,23 +3,20 @@
 #include "bench.h"
 #include "simassert.h"
 
-Bench::Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd):
-  _top(top),
-  _uart(9600, top.p_io__pins__rx, top.p_io__pins__tx),
-  _vcd(vcd),
-  _vcd_time(0)
-{}
+Bench::Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd)
+    : _top(top), _uart(9600, top.p_io__pins__rx, top.p_io__pins__tx), _vcd(vcd),
+      _vcd_time(0) {}
 
-struct eight_bit_byte { uint8_t byte; };
-std::ostream &operator <<(std::ostream &os, const eight_bit_byte &ebb)
-{
+struct eight_bit_byte {
+  uint8_t byte;
+};
+std::ostream &operator<<(std::ostream &os, const eight_bit_byte &ebb) {
   for (int j = 7; j >= 0; --j)
     os << ((ebb.byte >> j) & 1 ? '1' : '0');
   return os;
 }
 
-int Bench::run()
-{
+int Bench::run() {
   std::random_device rd;
   std::mt19937 mt(rd());
   std::uniform_int_distribution<uint8_t> dist(0, 255);
@@ -98,19 +95,14 @@ int Bench::run()
   return 0;
 }
 
-uint64_t Bench::cycle_number() const
-{
-  return _vcd_time >> 1;
-}
+uint64_t Bench::cycle_number() const { return _vcd_time >> 1; }
 
-void Bench::cycle()
-{
+void Bench::cycle() {
   _uart.cycle();
   step();
 }
 
-void Bench::step()
-{
+void Bench::step() {
   simassert(!_top.CLOCK_WIRE, "step when clock not low");
   _top.CLOCK_WIRE.set(true);
   _top.step();

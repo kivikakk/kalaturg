@@ -5,8 +5,7 @@
 
 #include <cxxrtl/cxxrtl.h>
 
-class UART
-{
+class UART {
 public:
   UART(unsigned int baud, cxxrtl::value<1> &tx_wire, cxxrtl::value<1> &rx_wire);
 
@@ -26,7 +25,7 @@ public:
   void rx_expect();
   enum rx_state_t rx_state() const;
   bool rx_read(uint8_t *out);
-  
+
 private:
   const unsigned int _divisor;
 

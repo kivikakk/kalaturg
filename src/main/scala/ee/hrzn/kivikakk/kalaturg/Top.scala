@@ -5,13 +5,13 @@ import chisel3._
 import chisel3.experimental.ExtModule
 import chisel3.experimental.noPrefix
 import chisel3.util._
+import ee.hrzn.chryse.HasIO
+import ee.hrzn.chryse.platform.ElaboratablePlatform
+import ee.hrzn.chryse.platform.Platform
+import ee.hrzn.chryse.platform.cxxrtl.CXXRTLPlatform
+import ee.hrzn.chryse.platform.ice40.ICE40Platform
+import ee.hrzn.chryse.platform.ice40.ICE40Top
 import ee.hrzn.kivikakk.kalaturg.uart.UART
-import ee.hrzn.kivikakk.sb.CXXRTLPlatform
-import ee.hrzn.kivikakk.sb.ElaboratablePlatform
-import ee.hrzn.kivikakk.sb.HasIO
-import ee.hrzn.kivikakk.sb.ICE40Platform
-import ee.hrzn.kivikakk.sb.ICE40Top
-import ee.hrzn.kivikakk.sb.Platform
 
 import java.io.PrintWriter
 
@@ -36,6 +36,44 @@ class Top(val baud: Int = 9600)(implicit platform: Platform)
     with HasIO[TopIO] {
   def createIo() = new TopIO
 
+  private val uart = Module(new UART(baud = baud))
+  io.pins :<>= uart.pinsIo
+
+  uart.txIo.bits  := uart.rxIo.bits.byte
+  uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
+  uart.rxIo.ready := uart.txIo.ready
+
+  platform match {
+    case CXXRTLPlatform =>
+      val bb = Module(new CXXRTLTestbench)
+      bb.io.clock := clock
+      bb.io.rx    := io.pins.rx
+      io.pins.tx  := bb.io.tx
+    case _ =>
+  }
+
+  private val pwm = Module(new PWM)
+  io.pwm :<>= pwm.io
+
+  private val blinker = Module(new Blinker)
+  io.ledr := blinker.io.ledr
+  io.ledg := blinker.io.ledg
+}
+
+class CXXRTLTestbench extends BlackBox {
+  val io = IO(new Bundle {
+    val clock = Input(Clock())
+    val rx    = Input(Bool())
+    val tx    = Output(Bool())
+  })
+}
+
+class Blinker(implicit platform: Platform) extends Module {
+  val io = IO(new Bundle {
+    val ledr = Output(Bool())
+    val ledg = Output(Bool())
+  })
+
   private val ledReg = RegInit(true.B)
   io.ledr := ledReg
   val timerReg = RegInit(2_999_999.U(unsignedBitLength(5_999_999).W))
@@ -47,16 +85,6 @@ class Top(val baud: Int = 9600)(implicit platform: Platform)
   }
 
   io.ledg := false.B
-
-  private val uart = Module(new UART(baud = baud))
-  io.pins :<>= uart.pinsIo
-
-  uart.txIo.bits  := uart.rxIo.bits.byte
-  uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
-  uart.rxIo.ready := uart.txIo.ready
-
-  private val pwm = Module(new PWM)
-  io.pwm :<>= pwm.io
 }
 
 object Top extends App {

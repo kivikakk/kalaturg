@@ -1,8 +1,8 @@
 #ifndef BENCH_H
 #define BENCH_H
 
-#include <cxxrtl/cxxrtl_vcd.h>
 #include <Top.h>
+#include <cxxrtl/cxxrtl_vcd.h>
 
 #include "uart.h"
 
@@ -10,14 +10,13 @@
 #define CLOCK_NAME clk
 #endif
 
-#define JOINER(x, y) x ## y
+#define JOINER(x, y) x##y
 #define REJOINER(x, y) JOINER(x, y)
 #define CLOCK_WIRE REJOINER(p_, CLOCK_NAME)
 
 #define CLOCK_HZ 3000000
 
-class Bench
-{
+class Bench {
 public:
   Bench(cxxrtl_design::p_top &top, cxxrtl::vcd_writer &vcd);
 

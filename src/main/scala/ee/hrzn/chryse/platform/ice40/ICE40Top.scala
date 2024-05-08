@@ -1,7 +1,10 @@
-package ee.hrzn.kivikakk.sb
+package ee.hrzn.chryse.platform.ice40
 
 import chisel3._
 import chisel3.util._
+import ee.hrzn.chryse.HasIO
+import ee.hrzn.chryse.platform.Platform
+import ee.hrzn.chryse.sb.SB_GB
 
 class ICE40Top[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
     platform: Platform,

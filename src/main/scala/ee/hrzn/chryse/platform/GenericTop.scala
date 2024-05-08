@@ -1,7 +1,8 @@
-package ee.hrzn.kivikakk.sb
+package ee.hrzn.chryse.platform
 
 import chisel3._
-import ee.hrzn.kivikakk.sb.Platform
+import ee.hrzn.chryse.HasIO
+import ee.hrzn.chryse.platform.Platform
 
 class GenericTop[Top <: HasIO[_ <: Data]](genTop: => Top)(implicit
     platform: Platform,

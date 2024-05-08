@@ -437,21 +437,12 @@ module PWM(
   assign io_pmod1a3 = {1'h0, {5'h0, rgbVecReg_2} * 13'h16} > io_pmod1a3_cntReg;
 endmodule
 
-module Top(
+module Blinker(
   input  clock,
          reset,
-         io_pins_rx,
-  output io_pins_tx,
-         io_ledr,
-         io_pwm_pmod1a1,
-         io_pwm_pmod1a2,
-         io_pwm_pmod1a3
+  output io_ledr
 );
 
-  wire        _uart_txIo_ready;
-  wire        _uart_rxIo_valid;
-  wire [7:0]  _uart_rxIo_bits_byte;
-  wire        _uart_rxIo_bits_err;
   reg         ledReg;
   reg  [22:0] timerReg;
   wire        _GEN = timerReg == 23'h0;
@@ -468,6 +459,24 @@ module Top(
         timerReg <= timerReg - 23'h1;
     end
   end // always @(posedge)
+  assign io_ledr = ledReg;
+endmodule
+
+module Top(
+  input  clock,
+         reset,
+         io_pins_rx,
+  output io_pins_tx,
+         io_ledr,
+         io_pwm_pmod1a1,
+         io_pwm_pmod1a2,
+         io_pwm_pmod1a3
+);
+
+  wire       _uart_txIo_ready;
+  wire       _uart_rxIo_valid;
+  wire [7:0] _uart_rxIo_bits_byte;
+  wire       _uart_rxIo_bits_err;
   UART uart (
     .clock          (clock),
     .reset          (reset),
@@ -488,7 +497,11 @@ module Top(
     .io_pmod1a2 (io_pwm_pmod1a2),
     .io_pmod1a3 (io_pwm_pmod1a3)
   );
-  assign io_ledr = ledReg;
+  Blinker blinker (
+    .clock   (clock),
+    .reset   (reset),
+    .io_ledr (io_ledr)
+  );
 endmodule
 
 module top(

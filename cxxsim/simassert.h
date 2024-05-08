@@ -3,8 +3,7 @@
 
 #include <stdexcept>
 
-class assertion_error : public std::runtime_error
-{
+class assertion_error : public std::runtime_error {
 public:
   assertion_error(const std::string &msg);
 };

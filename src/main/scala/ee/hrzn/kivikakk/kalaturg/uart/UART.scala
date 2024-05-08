@@ -2,7 +2,7 @@ package ee.hrzn.kivikakk.kalaturg.uart
 
 import chisel3._
 import chisel3.util._
-import ee.hrzn.kivikakk.sb.Platform
+import ee.hrzn.chryse.platform.Platform
 
 class UART(val baud: Int = 9600)(implicit platform: Platform)
     extends Module {

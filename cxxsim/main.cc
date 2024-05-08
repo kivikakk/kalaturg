@@ -1,14 +1,13 @@
 #include <fstream>
 #include <iostream>
 
-#include <cxxrtl/cxxrtl_vcd.h>
 #include <Top.h>
+#include <cxxrtl/cxxrtl_vcd.h>
 
-#include "simassert.h"
 #include "bench.h"
+#include "simassert.h"
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   cxxrtl_design::p_top top;
   debug_items di;
   top.debug_info(&di, nullptr, "top ");
@@ -23,9 +22,8 @@ int main(int argc, char **argv)
   try {
     ret = bench.run();
   } catch (assertion_error &e) {
-    std::cerr
-      << "got assertion on cycle " << bench.cycle_number() << std::endl
-      << e.what() << std::endl;
+    std::cerr << "got assertion on cycle " << bench.cycle_number() << std::endl
+              << e.what() << std::endl;
     ret = -1;
   }
 

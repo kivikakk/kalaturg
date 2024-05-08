@@ -3,7 +3,7 @@ package ee.hrzn.kivikakk.kalaturg.uart
 import chisel3._
 import chiseltest._
 import chiseltest.simulator.WriteVcdAnnotation
-import ee.hrzn.kivikakk.sb.Platform
+import ee.hrzn.chryse.platform.Platform
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -13,7 +13,7 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   // These tests are *really* ugly, but they work for now. Need more clarity.
 
   implicit private val platform: Platform = new Platform {
-    val id = "uartspec"
+    val id      = "uartspec"
     val clockHz = 3
   }
 

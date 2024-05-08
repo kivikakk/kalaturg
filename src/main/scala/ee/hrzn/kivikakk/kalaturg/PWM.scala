@@ -2,7 +2,7 @@ package ee.hrzn.kivikakk.kalaturg
 
 import chisel3._
 import chisel3.util._
-import ee.hrzn.kivikakk.sb.Platform
+import ee.hrzn.chryse.platform.Platform
 
 class PWMIO extends Bundle {
   val pmod1a1 = Output(Bool())

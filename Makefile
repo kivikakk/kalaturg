@@ -6,6 +6,7 @@ SCALA_SRCS = $(shell find src/main/scala)
 
 CXXSIM_EXE = $(BUILD_DIR)/cxxsim
 CXXSIM_CC = $(ARTIFACT_PREFIX).cc
+CXXSIM_BLACKBOX_IL = cxxsim/blackboxes.il
 CXXSIM_SRCS = $(CXXSIM_CC) $(wildcard cxxsim/*.cc)
 CXXSIM_OBJS = $(subst cxxsim/,$(BUILD_DIR)/,$(patsubst %.cc,%.o,$(CXXSIM_SRCS)))
 CXXSIM_OPTS = -std=c++14 -g -Wall -pedantic -Wno-zero-length-array
@@ -73,8 +74,9 @@ $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cc
 		-c $< -o $@
 
 
-$(CXXSIM_CC): $(BASENAME)-cxxrtl.sv
+$(CXXSIM_CC): $(BASENAME)-cxxrtl.sv $(CXXSIM_BLACKBOX_IL)
 	@mkdir -p $(BUILD_DIR)
 	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt \
-		-p 'read_verilog -sv $<' \
+		-p 'read_rtlil $(CXXSIM_BLACKBOX_IL)' \
+		-p 'read_verilog -sv $(BASENAME)-cxxrtl.sv' \
 		-p 'write_cxxrtl -header $@'

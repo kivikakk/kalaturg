@@ -1,4 +1,4 @@
-package ee.hrzn.kivikakk.sb
+package ee.hrzn.chryse.sb
 
 import chisel3._
 import chisel3.experimental.ExtModule
