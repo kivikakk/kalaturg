@@ -1,4 +1,4 @@
-name: Unit tests
+name: iCE40 synthesis
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         distribution: 'temurin'
         cache: 'sbt'
     - name: Install Yosys and nextpnr
-      run: apt-get install yosys nextpnr-ice40
+      run: sudo apt-get install yosys nextpnr-ice40
     - name: Elaborate
       run: sbt run
     - name: Synthesise
