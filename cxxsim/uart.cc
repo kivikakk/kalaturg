@@ -85,8 +85,9 @@ void UART::cycle()
     case rx_stop:
       simassert((bool)_rx_wire, "rx went low while (expected) STOP");
       if (--_rx_timer == 0) {
-        simassert(!_rx_buffer.has_value(), "rx buffer already full");
+        simassert(!_rx_buffer_full, "rx buffer already full");
         _rx_buffer = _rx_sr;
+        _rx_buffer_full = true;
         _rx_state = rx_idle;
       }
       break;
@@ -122,9 +123,11 @@ enum UART::rx_state_t UART::rx_state() const
   return _rx_state;
 }
 
-std::optional<uint8_t> UART::rx_read()
+bool UART::rx_read(uint8_t *out)
 {
-  std::optional<uint8_t> rv;
-  rv.swap(_rx_buffer);
-  return rv;
+  if (!_rx_buffer_full)
+    return false;
+  _rx_buffer_full = false;
+  *out = _rx_buffer;
+  return true;
 }

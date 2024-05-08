@@ -8,7 +8,7 @@ CXXSIM_EXE = $(BUILD_DIR)/cxxsim
 CXXSIM_CC = $(ARTIFACT_PREFIX).cc
 CXXSIM_SRCS = $(CXXSIM_CC) $(wildcard cxxsim/*.cc)
 CXXSIM_OBJS = $(subst cxxsim/,$(BUILD_DIR)/,$(patsubst %.cc,%.o,$(CXXSIM_SRCS)))
-CXXSIM_OPTS = -std=c++17 -g -Wall -pedantic -Wno-zero-length-array
+CXXSIM_OPTS = -std=c++14 -g -Wall -pedantic -Wno-zero-length-array
 # -O3 makes a huge difference to running time.
 # -fsanitize=address -fno-omit-frame-pointer for extra de🐞.
 
@@ -57,12 +57,21 @@ $(CXXSIM_EXE): $(CXXSIM_CC) $(CXXSIM_OBJS)
 $(CXXSIM_EXE):
 	$(CXX) $(CXXSIM_OPTS) $(CXXSIM_OBJS) -o $@
 
-$(BUILD_DIR)/%.o: */%.cc
+$(BUILD_DIR)/%.o: cxxsim/%.cc
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXSIM_OPTS) -DCLOCK_NAME=clock \
 		-I$(BUILD_DIR) \
 		-I$(shell yosys-config --datdir)/include/backends/cxxrtl/runtime \
 		-c $< -o $@
+
+# HACK: duplicate above for BUILD_DIR.
+$(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cc
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXXSIM_OPTS) -DCLOCK_NAME=clock \
+		-I$(BUILD_DIR) \
+		-I$(shell yosys-config --datdir)/include/backends/cxxrtl/runtime \
+		-c $< -o $@
+
 
 $(CXXSIM_CC): $(BASENAME)-cxxrtl.sv
 	@mkdir -p $(BUILD_DIR)

@@ -25,7 +25,7 @@ public:
 
   void rx_expect();
   enum rx_state_t rx_state() const;
-  std::optional<uint8_t> rx_read();
+  bool rx_read(uint8_t *out);
   
 private:
   const unsigned int _divisor;
@@ -47,7 +47,8 @@ private:
   unsigned int _rx_timer;
   unsigned char _rx_counter;
   uint8_t _rx_sr;
-  std::optional<uint8_t> _rx_buffer;
+  uint8_t _rx_buffer;
+  bool _rx_buffer_full;
 };
 
 #endif
