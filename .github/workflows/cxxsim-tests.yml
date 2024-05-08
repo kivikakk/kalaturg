@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 22
@@ -26,4 +26,4 @@ jobs:
     - name: Elaborate
       run: sbt run
     - name: Run cxxsim tests
-      run: make -j4 cxxsim CXX=clang++
+      run: make -j4 cxxsim CXX=clang++-15
