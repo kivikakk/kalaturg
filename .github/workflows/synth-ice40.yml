@@ -1,0 +1,29 @@
+name: iCE40 synthesis
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 22
+      uses: actions/setup-java@v4
+      with:
+        java-version: '22'
+        distribution: 'temurin'
+        cache: 'sbt'
+    - name: Install OSS CAD Suite
+      uses: YosysHQ/setup-oss-cad-suite@v3
+    - run: yosys --version
+    - name: Elaborate
+      run: sbt run
+    - name: Synthesise
+      run: make ice40

@@ -43,11 +43,11 @@ $(ARTIFACT_PREFIX).asc: $(ARTIFACT_PREFIX).json $(BASENAME)-ice40.pcf
 		--asc $@
 
 $(ARTIFACT_PREFIX).json: $(BASENAME)-ice40.sv
-	yosys -q -g -l $(ARTIFACT_PREFIX).rpt -p ' \
-		read_verilog -sv $< ;\
-		synth_ice40 -top top ;\
-		write_json $@ ;\
-	'
+	@mkdir -p $(BUILD_DIR)
+	yosys -q -g -l $(ARTIFACT_PREFIX).rpt \
+		-p 'read_verilog -sv $<' \
+		-p 'synth_ice40 -top top' \
+		-p 'write_json $@'
 
 cxxsim: $(CXXSIM_EXE)
 	$<
@@ -58,13 +58,14 @@ $(CXXSIM_EXE):
 	$(CXX) $(CXXSIM_OPTS) $(CXXSIM_OBJS) -o $@
 
 $(BUILD_DIR)/%.o: */%.cc
+	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXSIM_OPTS) -DCLOCK_NAME=clock \
 		-I$(BUILD_DIR) \
 		-I$(shell yosys-config --datdir)/include/backends/cxxrtl/runtime \
 		-c $< -o $@
 
 $(CXXSIM_CC): $(BASENAME)-cxxrtl.sv
-	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt -p '\
-		read_verilog -sv $< ;\
-		write_cxxrtl -header $@ ;\
-	'
+	@mkdir -p $(BUILD_DIR)
+	yosys -q -g -l $(ARTIFACT_PREFIX)-cxxsim.rpt \
+		-p 'read_verilog -sv $<' \
+		-p 'write_cxxrtl -header $@'
