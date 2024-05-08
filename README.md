@@ -55,10 +55,10 @@ Done so far:
 * Refactor out some key pieces.
 * Actions CI for unit tests.
 * Introduce a "Platform" notion to build separately for iCE40 and CXXRTL.
+* Actions CI for cxxsim, synthesis.
 
 WIP/todo:
 
-* Actions CI for cxxsim, synthesis.
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
   it driving everything through lines from the top. ~~Get it working first with
   Amaranth, then Chisel.~~
