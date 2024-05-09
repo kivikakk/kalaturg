@@ -51,13 +51,10 @@ Done so far:
 * Redo the base UART module using `Queue`.
 * Test it on the iCEBreaker!
 * Mess around with SB_RGBA_DRV. Buffer the clock input with SB_GB.
-* Drop the Python stuff, it's no longer necessary.
-* Refactor out some key pieces.
-* Actions CI for unit tests.
+* Drop all the Python; it's no longer necessary.
+* Actions CI for unit tests, cxxsim, synthesis.
 * Introduce a "Platform" notion to build separately for iCE40 and CXXRTL.
-* Actions CI for cxxsim, synthesis.
-* Split off the refactored stuff.
-* Okay now [_really_ split it off][chryse].
+* [Split off the project-independent bits][chryse].
 
 WIP/todo:
 
