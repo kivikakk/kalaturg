@@ -1,8 +1,8 @@
-#include "uart.h"
-#include "bench.h"
+#include "UART.h"
+#include "main.h"
 #include "simassert.h"
 
-UART::UART(unsigned int baud, cxxrtl::value<1> &tx_wire,
+UART::UART(unsigned int baud, cxxrtl::wire<1> &tx_wire,
            cxxrtl::value<1> &rx_wire)
     : _divisor(CLOCK_HZ / baud), _tx_wire(tx_wire), _tx_state(tx_idle),
       _rx_wire(rx_wire), _rx_state(rx_idle) {

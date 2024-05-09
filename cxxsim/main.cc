@@ -4,7 +4,8 @@
 #include <Top.h>
 #include <cxxrtl/cxxrtl_vcd.h>
 
-#include "bench.h"
+#include "main.h"
+#include "CXXRTLTestbench.h"
 #include "simassert.h"
 
 int main(int argc, char **argv) {
@@ -14,17 +15,28 @@ int main(int argc, char **argv) {
 
   bool do_vcd = argc >= 2 && std::string(argv[1]) == "--vcd";
   cxxrtl::vcd_writer vcd;
+  uint64_t vcd_time = 0;
   if (do_vcd)
     vcd.add(di);
 
-  Bench bench(top, vcd);
-  int ret = -1;
-  try {
-    ret = bench.run();
-  } catch (assertion_error &e) {
-    std::cerr << "got assertion on cycle " << bench.cycle_number() << std::endl
-              << e.what() << std::endl;
-    ret = -1;
+  auto &bench = CXXRTLTestbench::inst();
+
+  int ret = 0;
+  while (!bench.finished()) {
+    try {
+      top.CLOCK_WIRE.set(true);
+      top.step();
+      vcd.sample(vcd_time++);
+
+      top.CLOCK_WIRE.set(false);
+      top.step();
+      vcd.sample(vcd_time++);
+    } catch (assertion_error &e) {
+      std::cerr << "got assertion on cycle " << (vcd_time >> 1) << std::endl
+                << e.what() << std::endl;
+      ret = -1;
+      break;
+    }
   }
 
   if (do_vcd) {
