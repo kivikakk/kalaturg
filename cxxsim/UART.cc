@@ -4,9 +4,14 @@
 
 UART::UART(unsigned int baud, cxxrtl::wire<1> &tx_wire,
            cxxrtl::value<1> &rx_wire)
-    : _divisor(CLOCK_HZ / baud), _tx_wire(tx_wire), _tx_state(tx_idle),
-      _rx_wire(rx_wire), _rx_state(rx_idle) {
+    : _divisor(CLOCK_HZ / baud), _tx_wire(tx_wire), _rx_wire(rx_wire) {
+  reset();
+}
+
+void UART::reset() {
   _tx_wire.set(true);
+  _tx_state = tx_idle;
+  _rx_state = rx_idle;
 }
 
 void UART::cycle() {
@@ -51,6 +56,7 @@ void UART::cycle() {
     simassert((bool)_rx_wire, "rx went low while (expected) idle");
     break;
   case rx_expecting:
+    simassert(--_rx_timer != 0, "rx expected but never saw");
     if (!_rx_wire) {
       _rx_state = rx_start;
       _rx_timer = _divisor - 1;
@@ -105,6 +111,8 @@ void UART::rx_expect() {
   simassert(_rx_state == rx_idle, "expect when rx not idle");
 
   _rx_state = rx_expecting;
+  // We should get something within 20 bits'.
+  _rx_timer = _divisor * 20;
 }
 
 enum UART::rx_state_t UART::rx_state() const { return _rx_state; }

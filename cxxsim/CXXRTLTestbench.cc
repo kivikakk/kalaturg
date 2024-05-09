@@ -6,22 +6,13 @@
 #include "simassert.h"
 #include "utility.h"
 
-#define INPUT_COUNT 1 // XXX: 1->6
+#define INPUT_COUNT 6
 
-CXXRTLTestbench::CXXRTLTestbench()
-    : _finished(false), _uart(9600, p_tx, p_rx), _inputs(), _state(sSetup),
-      _timer(2) {
+CXXRTLTestbench::CXXRTLTestbench() : _uart(9600, p_tx, p_rx) {
   simassert(_inst == nullptr, "CXXRTLTestbench already exists");
   _inst = this;
 
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<uint8_t> dist(0, 255);
-  for (int i = 0; i < INPUT_COUNT; ++i) {
-    auto input = dist(mt);
-    std::cout << "input: " << eight_bit_byte{input} << std::endl;
-    _inputs.push_front(input);
-  }
+  reset();
 }
 
 CXXRTLTestbench::~CXXRTLTestbench() {
@@ -36,7 +27,22 @@ CXXRTLTestbench &CXXRTLTestbench::inst() {
 
 CXXRTLTestbench *CXXRTLTestbench::_inst = nullptr;
 
-void CXXRTLTestbench::reset() { p_tx = wire<1>{1u}; }
+void CXXRTLTestbench::reset() {
+  p_tx = wire<1>{1u};
+
+  _finished = false;
+  _uart.reset();
+
+  _inputs.clear();
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<uint8_t> dist(0, 255);
+  for (int i = 0; i < INPUT_COUNT; ++i)
+    _inputs.push_front(dist(mt));
+
+  _state = sSetup;
+  _timer = 2;
+}
 
 bool CXXRTLTestbench::eval(performer *performer) {
   bool converged = true;
@@ -55,24 +61,29 @@ bool CXXRTLTestbench::eval(performer *performer) {
       break;
     case sInitialStable:
       if (--_timer == 0) {
-        for (auto input : _inputs)
+        for (auto input : _inputs) {
+          std::cout << "input: " << eight_bit_byte{input} << std::endl;
           _uart.tx_queue(input);
+        }
         _state = sEcho;
       }
       break;
     case sEcho:
+      if (_uart.rx_read(&output)) {
+        simassert(!_inputs.empty(),
+                  "CXXRTLTestbench got UART read but inputs empty");
+        std::cout << "output: " << eight_bit_byte{output} << std::endl;
+        simassert(output == _inputs.front(),
+                  "CXXRTLTestbench got UART read but mismatch");
+        _inputs.pop_front();
+      }
       if (_uart.rx_state() == UART::rx_idle) {
         if (_inputs.empty())
           _finished = true;
-        else
+        else {
+          std::cout << "expect()" << std::endl;
           _uart.rx_expect();
-      }
-
-      if (_uart.rx_read(&output)) {
-        simassert(!_inputs.empty(), "CXXRTLTestbench got UART read but inputs empty");
-        std::cout << "output: " << eight_bit_byte{output} << std::endl;
-        simassert(output == _inputs.front(), "CXXRTLTestbench got UART read but mismatch");
-        _inputs.pop_front();
+        }
       }
       break;
     }

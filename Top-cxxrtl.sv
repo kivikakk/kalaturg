@@ -15,12 +15,12 @@ module RX(
   reg  [7:0]      bitsReg_byte;
   reg             bitsReg_err;
   reg  [1:0]      state;
-  reg  [3:0]      timerReg;
+  reg  [8:0]      timerReg;
   reg  [3:0]      counterReg;
   reg  [9:0]      shiftReg;
   wire            _GEN = state == 2'h0;
   wire            _GEN_0 = state == 2'h1;
-  wire            _GEN_1 = timerReg == 4'h0;
+  wire            _GEN_1 = timerReg == 9'h0;
   wire            _GEN_2 = _GEN_0 & _GEN_1;
   wire            _GEN_3 = state == 2'h2;
   wire            _GEN_4 = _GEN | _GEN_0;
@@ -37,7 +37,7 @@ module RX(
       bitsReg_byte <= 8'h0;
       bitsReg_err <= 1'h0;
       state <= 2'h0;
-      timerReg <= 4'h0;
+      timerReg <= 9'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
@@ -59,16 +59,16 @@ module RX(
         if (syncedPinIo) begin
         end
         else begin
-          timerReg <= 4'h6;
+          timerReg <= 9'h9C;
           counterReg <= 4'h9;
         end
       end
       else begin
         if (_GEN_0) begin
           if (_GEN_1)
-            timerReg <= 4'hC;
+            timerReg <= 9'h137;
           else
-            timerReg <= timerReg - 4'h1;
+            timerReg <= timerReg - 9'h1;
         end
         if (_GEN_2)
           counterReg <= counterReg - 4'h1;
@@ -173,23 +173,23 @@ module TX(
 );
 
   reg        state;
-  reg  [3:0] timerReg;
+  reg  [8:0] timerReg;
   reg  [3:0] counterReg;
   reg  [9:0] shiftReg;
-  wire       _GEN = timerReg == 4'h0;
+  wire       _GEN = timerReg == 9'h0;
   always @(posedge clock) begin
     if (reset) begin
       state <= 1'h0;
-      timerReg <= 4'h0;
+      timerReg <= 9'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
     else if (state) begin
       state <= ~(state & _GEN & counterReg == 4'h0) & state;
       if (_GEN)
-        timerReg <= 4'hC;
+        timerReg <= 9'h137;
       else
-        timerReg <= timerReg - 4'h1;
+        timerReg <= timerReg - 9'h1;
       if (state & _GEN) begin
         counterReg <= counterReg - 4'h1;
         shiftReg <= {shiftReg[8:0], 1'h0};
@@ -198,7 +198,7 @@ module TX(
     else begin
       state <= io_valid | state;
       if (io_valid) begin
-        timerReg <= 4'hC;
+        timerReg <= 9'h137;
         counterReg <= 4'h9;
         shiftReg <= {1'h0, io_bits, 1'h1};
       end
@@ -346,129 +346,9 @@ endmodule
 
 // external module CXXRTLTestbench
 
-module PWM(
-  input  clock,
-         reset,
-  output io_pmod1a1,
-         io_pmod1a2,
-         io_pmod1a3
-);
-
-  reg  [7:0]      rgbVecReg_0;
-  reg  [7:0]      rgbVecReg_1;
-  reg  [7:0]      rgbVecReg_2;
-  reg  [11:0]     io_pmod1a1_cntReg;
-  reg  [11:0]     io_pmod1a2_cntReg;
-  reg  [11:0]     io_pmod1a3_cntReg;
-  reg  [15:0]     rgbCounterReg;
-  reg  [1:0]      elementIxReg;
-  reg             incrementingReg;
-  wire [3:0][7:0] _GEN = {{rgbVecReg_0}, {rgbVecReg_2}, {rgbVecReg_1}, {rgbVecReg_0}};
-  wire [7:0]      _GEN_0 = _GEN[elementIxReg];
-  wire            _GEN_1 = elementIxReg == 2'h1;
-  wire            _GEN_2 = elementIxReg == 2'h2;
-  wire            _GEN_3 = _GEN_0 != 8'hFF;
-  wire [7:0]      _rgbVecReg_T = _GEN_0 + 8'h1;
-  wire [7:0]      _rgbVecReg_T_2 = _GEN_0 - 8'h1;
-  always @(posedge clock) begin
-    if (reset) begin
-      rgbVecReg_0 <= 8'hFF;
-      rgbVecReg_1 <= 8'h0;
-      rgbVecReg_2 <= 8'h0;
-      io_pmod1a1_cntReg <= 12'h0;
-      io_pmod1a2_cntReg <= 12'h0;
-      io_pmod1a3_cntReg <= 12'h0;
-      rgbCounterReg <= 16'h0;
-      elementIxReg <= 2'h1;
-      incrementingReg <= 1'h1;
-    end
-    else begin
-      if (rgbCounterReg == 16'hB71A) begin
-        if (incrementingReg) begin
-          if (_GEN_3 & ~(|elementIxReg))
-            rgbVecReg_0 <= _rgbVecReg_T;
-          if (_GEN_3 & _GEN_1)
-            rgbVecReg_1 <= _rgbVecReg_T;
-          if (_GEN_3 & _GEN_2)
-            rgbVecReg_2 <= _rgbVecReg_T;
-          if (~_GEN_3) begin
-            if (|elementIxReg)
-              elementIxReg <= elementIxReg - 2'h1;
-            else
-              elementIxReg <= 2'h2;
-          end
-          incrementingReg <= _GEN_3 ^ ~incrementingReg;
-        end
-        else begin
-          if ((|_GEN_0) & ~(|elementIxReg))
-            rgbVecReg_0 <= _rgbVecReg_T_2;
-          if ((|_GEN_0) & _GEN_1)
-            rgbVecReg_1 <= _rgbVecReg_T_2;
-          if ((|_GEN_0) & _GEN_2)
-            rgbVecReg_2 <= _rgbVecReg_T_2;
-          if (~(|_GEN_0)) begin
-            if (|elementIxReg)
-              elementIxReg <= elementIxReg - 2'h1;
-            else
-              elementIxReg <= 2'h2;
-          end
-          incrementingReg <= (|_GEN_0) ^ ~incrementingReg;
-        end
-        rgbCounterReg <= 16'h0;
-      end
-      else
-        rgbCounterReg <= rgbCounterReg + 16'h1;
-      if (io_pmod1a1_cntReg == 12'hB70)
-        io_pmod1a1_cntReg <= 12'h0;
-      else
-        io_pmod1a1_cntReg <= io_pmod1a1_cntReg + 12'h1;
-      if (io_pmod1a2_cntReg == 12'hB70)
-        io_pmod1a2_cntReg <= 12'h0;
-      else
-        io_pmod1a2_cntReg <= io_pmod1a2_cntReg + 12'h1;
-      if (io_pmod1a3_cntReg == 12'hB70)
-        io_pmod1a3_cntReg <= 12'h0;
-      else
-        io_pmod1a3_cntReg <= io_pmod1a3_cntReg + 12'h1;
-    end
-  end // always @(posedge)
-  assign io_pmod1a1 = {1'h0, {3'h0, rgbVecReg_0} * 11'h5} > io_pmod1a1_cntReg;
-  assign io_pmod1a2 = {1'h0, {3'h0, rgbVecReg_1} * 11'h5} > io_pmod1a2_cntReg;
-  assign io_pmod1a3 = {1'h0, {3'h0, rgbVecReg_2} * 11'h5} > io_pmod1a3_cntReg;
-endmodule
-
-module Blinker(
-  input  clock,
-         reset,
-  output io_ledr
-);
-
-  reg         ledReg;
-  reg  [22:0] timerReg;
-  wire        _GEN = timerReg == 23'h0;
-  always @(posedge clock) begin
-    if (reset) begin
-      ledReg <= 1'h1;
-      timerReg <= 23'h2DC6BF;
-    end
-    else begin
-      ledReg <= _GEN ^ ledReg;
-      if (_GEN)
-        timerReg <= 23'h5B8D7F;
-      else
-        timerReg <= timerReg - 23'h1;
-    end
-  end // always @(posedge)
-  assign io_ledr = ledReg;
-endmodule
-
 module Top(
-  input  clock,
-         reset,
-  output io_ledr,
-         io_pwm_pmod1a1,
-         io_pwm_pmod1a2,
-         io_pwm_pmod1a3
+  input clock,
+        reset
 );
 
   wire       _bb_tx;
@@ -495,18 +375,6 @@ module Top(
     .rx    (_uart_pinsIo_tx),
     .tx    (_bb_tx)
   );
-  PWM pwm (
-    .clock      (clock),
-    .reset      (reset),
-    .io_pmod1a1 (io_pwm_pmod1a1),
-    .io_pmod1a2 (io_pwm_pmod1a2),
-    .io_pmod1a3 (io_pwm_pmod1a3)
-  );
-  Blinker blinker (
-    .clock   (clock),
-    .reset   (reset),
-    .io_ledr (io_ledr)
-  );
 endmodule
 
 module top(
@@ -522,14 +390,14 @@ module top(
 );
 
   Top top (
-    .clock          (clock),
-    .reset          (reset),
-    .io_ledr        (io_ledr),
-    .io_pwm_pmod1a1 (io_pwm_pmod1a1),
-    .io_pwm_pmod1a2 (io_pwm_pmod1a2),
-    .io_pwm_pmod1a3 (io_pwm_pmod1a3)
+    .clock (clock),
+    .reset (reset)
   );
   assign io_pins_tx = 1'h0;
+  assign io_ledr = 1'h0;
   assign io_ledg = 1'h0;
+  assign io_pwm_pmod1a1 = 1'h0;
+  assign io_pwm_pmod1a2 = 1'h0;
+  assign io_pwm_pmod1a3 = 1'h0;
 endmodule
 

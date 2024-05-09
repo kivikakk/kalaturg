@@ -17,6 +17,7 @@ public:
     rx_stop,
   };
 
+  void reset();
   void cycle();
   unsigned int divisor() const;
 

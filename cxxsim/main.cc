@@ -1,3 +1,4 @@
+#include <csignal>
 #include <fstream>
 #include <iostream>
 
@@ -8,7 +9,12 @@
 #include "main.h"
 #include "simassert.h"
 
+static bool caught_sigint = false;
+static void sigint_handler(int signum) { caught_sigint = true; }
+
 int main(int argc, char **argv) {
+  signal(SIGINT, sigint_handler);
+
   cxxrtl_design::p_top top;
   debug_items di;
   top.debug_info(&di, nullptr, "top ");
@@ -21,6 +27,19 @@ int main(int argc, char **argv) {
 
   auto &bench = CXXRTLTestbench::inst();
 
+  // SYNCHRONOUS RESET lol.
+  top.p_reset.set(true);
+
+  top.CLOCK_WIRE.set(true);
+  top.step();
+  vcd.sample(vcd_time++);
+
+  top.CLOCK_WIRE.set(true);
+  top.step();
+  vcd.sample(vcd_time++);
+
+  top.p_reset.set(false);
+
   int ret = 0;
   try {
     while (!bench.finished()) {
@@ -31,6 +50,12 @@ int main(int argc, char **argv) {
       top.CLOCK_WIRE.set(false);
       top.step();
       vcd.sample(vcd_time++);
+
+      if (caught_sigint) {
+        std::cerr << "caught SIGINT on cycle " << (vcd_time >> 1) << std::endl;
+        ret = -2;
+        break;
+      }
     }
   } catch (assertion_error &e) {
     std::cerr << "got assertion on cycle " << (vcd_time >> 1) << std::endl
