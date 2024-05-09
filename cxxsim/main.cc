@@ -4,8 +4,8 @@
 #include <Top.h>
 #include <cxxrtl/cxxrtl_vcd.h>
 
-#include "main.h"
 #include "CXXRTLTestbench.h"
+#include "main.h"
 #include "simassert.h"
 
 int main(int argc, char **argv) {
@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
   auto &bench = CXXRTLTestbench::inst();
 
   int ret = 0;
-  while (!bench.finished()) {
-    try {
+  try {
+    while (!bench.finished()) {
       top.CLOCK_WIRE.set(true);
       top.step();
       vcd.sample(vcd_time++);
@@ -31,13 +31,14 @@ int main(int argc, char **argv) {
       top.CLOCK_WIRE.set(false);
       top.step();
       vcd.sample(vcd_time++);
-    } catch (assertion_error &e) {
-      std::cerr << "got assertion on cycle " << (vcd_time >> 1) << std::endl
-                << e.what() << std::endl;
-      ret = -1;
-      break;
     }
+  } catch (assertion_error &e) {
+    std::cerr << "got assertion on cycle " << (vcd_time >> 1) << std::endl
+              << e.what() << std::endl;
+    ret = -1;
   }
+
+  std::cout << "finished on cycle " << (vcd_time >> 1) << std::endl;
 
   if (do_vcd) {
     std::ofstream of("cxxsim.vcd");

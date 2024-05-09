@@ -1,6 +1,7 @@
 #ifndef CXXRTL_TESTBENCH_H
 #define CXXRTL_TESTBENCH_H
 
+#include <forward_list>
 #include <random>
 
 #include <Top.h>
@@ -24,10 +25,11 @@ private:
   bool _finished;
 
   UART _uart;
-  std::queue<uint8_t> _inputs;
+  std::forward_list<uint8_t> _inputs;
   enum state {
     sSetup,
     sInitialStable,
+    sEcho,
   } _state;
   unsigned int _timer;
 };
