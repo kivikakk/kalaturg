@@ -28,6 +28,8 @@ jobs:
 
     - name: Install OSS CAD Suite
       uses: YosysHQ/setup-oss-cad-suite@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     - run: yosys --version
 
     - name: Checkout this
