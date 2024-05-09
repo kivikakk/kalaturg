@@ -43,7 +43,7 @@ Done so far:
 * Learn to do a [very basic Chisel module with tests][Chisel Top] and Verilog
   output.
 * Build the Chisel module with CXXRTL and integrate it into the simulator —
-  it'll be very *wrong*, but the key is the integration.
+  it'll be very _wrong_, but the key is the integration.
 * [Write a little unbuffered UART pair, test them, integrate. **Done.**][done]
 * Extend the test case to exercise the Amaranth version's buffers on TX/RX.
 * ~~Write a FIFO in Chisel and buffer the TX/RX.~~
@@ -55,9 +55,6 @@ Done so far:
 * Actions CI for unit tests, cxxsim, synthesis.
 * Introduce a "Platform" notion to build separately for iCE40 and CXXRTL.
 * [Split off the project-independent bits][chryse].
-
-WIP/todo:
-
 * Redo the testbench to have the test unit as a blackboxed instance, rather than
   it driving everything through lines from the top. ~~Get it working first with
   Amaranth, then Chisel.~~
