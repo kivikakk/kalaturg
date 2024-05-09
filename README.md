@@ -69,3 +69,9 @@ Done so far:
 [Chisel Top]: https://github.com/kivikakk/kalaturg/commit/35a791d597e0f31a2affda72a9de2c3f21161e36
 [done]: https://github.com/kivikakk/kalaturg/commit/9d704aa2968ab3d287fe23ccfad2bdf26a88d5e3
 [chryse]: https://github.com/kivikakk/chryse
+
+---
+
+I turned this into [a little blogpost].
+
+[a little blogpost]: https://kivikakk.ee/notes/0007-amaranth-to-chisel.html
