@@ -17,12 +17,12 @@ module RX(
   reg  [7:0]      bitsReg_byte;
   reg             bitsReg_err;
   reg  [1:0]      state;
-  reg  [5:0]      timerReg;
+  reg  [10:0]     timerReg;
   reg  [3:0]      counterReg;
   reg  [9:0]      shiftReg;
   wire            _GEN = state == 2'h0;
   wire            _GEN_0 = state == 2'h1;
-  wire            _GEN_1 = timerReg == 6'h0;
+  wire            _GEN_1 = timerReg == 11'h0;
   wire            _GEN_2 = _GEN_0 & _GEN_1;
   wire            _GEN_3 = state == 2'h2;
   wire            _GEN_4 = _GEN | _GEN_0;
@@ -39,7 +39,7 @@ module RX(
       bitsReg_byte <= 8'h0;
       bitsReg_err <= 1'h0;
       state <= 2'h0;
-      timerReg <= 6'h0;
+      timerReg <= 11'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
@@ -61,16 +61,16 @@ module RX(
         if (syncedPinIo) begin
         end
         else begin
-          timerReg <= 6'h1A;
+          timerReg <= 11'h271;
           counterReg <= 4'h9;
         end
       end
       else begin
         if (_GEN_0) begin
           if (_GEN_1)
-            timerReg <= 6'h33;
+            timerReg <= 11'h4E1;
           else
-            timerReg <= timerReg - 6'h1;
+            timerReg <= timerReg - 11'h1;
         end
         if (_GEN_2)
           counterReg <= counterReg - 4'h1;
@@ -174,24 +174,24 @@ module TX(
   output       pinIo
 );
 
-  reg        state;
-  reg  [5:0] timerReg;
-  reg  [3:0] counterReg;
-  reg  [9:0] shiftReg;
-  wire       _GEN = timerReg == 6'h0;
+  reg         state;
+  reg  [10:0] timerReg;
+  reg  [3:0]  counterReg;
+  reg  [9:0]  shiftReg;
+  wire        _GEN = timerReg == 11'h0;
   always @(posedge clock) begin
     if (reset) begin
       state <= 1'h0;
-      timerReg <= 6'h0;
+      timerReg <= 11'h0;
       counterReg <= 4'h0;
       shiftReg <= 10'h0;
     end
     else if (state) begin
       state <= ~(state & _GEN & counterReg == 4'h0) & state;
       if (_GEN)
-        timerReg <= 6'h33;
+        timerReg <= 11'h4E1;
       else
-        timerReg <= timerReg - 6'h1;
+        timerReg <= timerReg - 11'h1;
       if (state & _GEN) begin
         counterReg <= counterReg - 4'h1;
         shiftReg <= {shiftReg[8:0], 1'h0};
@@ -200,7 +200,7 @@ module TX(
     else begin
       state <= io_valid | state;
       if (io_valid) begin
-        timerReg <= 6'h33;
+        timerReg <= 11'h4E1;
         counterReg <= 4'h9;
         shiftReg <= {1'h0, io_bits, 1'h1};
       end

@@ -2,3 +2,4 @@ CompileFlags:
   Add:
   - "-I/Users/kivikakk/.local/share/yosys/include/backends/cxxrtl/runtime"
   - "-I/Users/kivikakk/g/kalaturg/build"
+  - "-DCLOCK_NAME=clock"

@@ -1,0 +1,34 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Thu May  9 13:06:04 2024
+[*]
+[dumpfile] "/Users/kivikakk/g/kalaturg/cxxsim.vcd"
+[dumpfile_mtime] "Thu May  9 12:44:45 2024"
+[dumpfile_size] 253297
+[savefile] "/Users/kivikakk/g/kalaturg/cxxsim.gtkw"
+[timestart] 0
+[size] 2504 1387
+[pos] -1 -1
+*0.000000 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.top.
+[treeopen] top.top.uart.
+[sst_width] 253
+[signals_width] 152
+[sst_expanded] 1
+[sst_vpaned_height] 432
+@28
+top.clock
+top.reset
+top.top.bb.tx
+top.top.bb.rx
+@200
+-
+@28
+top.top.uart.rx.state[1:0]
+@22
+top.top.uart.rx.timerReg[8:0]
+@29
+top.top.uart.rx.syncedPinIo
+[pattern_trace] 1
+[pattern_trace] 0

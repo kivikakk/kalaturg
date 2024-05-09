@@ -7,7 +7,7 @@
 
 class UART {
 public:
-  UART(unsigned int baud, cxxrtl::value<1> &tx_wire, cxxrtl::value<1> &rx_wire);
+  UART(unsigned int baud, cxxrtl::wire<1> &tx_wire, cxxrtl::value<1> &rx_wire);
 
   enum rx_state_t {
     rx_idle,
@@ -17,6 +17,7 @@ public:
     rx_stop,
   };
 
+  void reset();
   void cycle();
   unsigned int divisor() const;
 
@@ -29,7 +30,7 @@ public:
 private:
   const unsigned int _divisor;
 
-  cxxrtl::value<1> &_tx_wire;
+  cxxrtl::wire<1> &_tx_wire;
   enum tx_state_t {
     tx_idle,
     tx_start,

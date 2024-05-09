@@ -51,7 +51,7 @@ $(ARTIFACT_PREFIX).json: $(BASENAME)-ice40.sv
 		-p 'write_json $@'
 
 cxxsim: $(CXXSIM_EXE)
-	$<
+	$< --vcd
 
 $(CXXSIM_EXE): $(CXXSIM_CC) $(CXXSIM_OBJS)
 

@@ -31,13 +31,12 @@ class TopIO extends Bundle {
   val pwm = new PWMIO
 }
 
-class Top(val baud: Int = 9600)(implicit platform: Platform)
+class Top(val baud: Int)(implicit platform: Platform)
     extends Module
     with HasIO[TopIO] {
   def createIo() = new TopIO
 
   private val uart = Module(new UART(baud = baud))
-  io.pins :<>= uart.pinsIo
 
   uart.txIo.bits  := uart.rxIo.bits.byte
   uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
@@ -46,18 +45,24 @@ class Top(val baud: Int = 9600)(implicit platform: Platform)
   platform match {
     case CXXRTLPlatform =>
       val bb = Module(new CXXRTLTestbench)
-      bb.io.clock := clock
-      bb.io.rx    := io.pins.rx
-      io.pins.tx  := bb.io.tx
+      bb.io.clock    := clock
+      uart.pinsIo.rx := bb.io.tx
+      bb.io.rx       := uart.pinsIo.tx
+
+      io.pins.tx := DontCare
+      io.pwm     := DontCare
+      io.ledr    := DontCare
+      io.ledg    := DontCare
     case _ =>
+      io.pins :<>= uart.pinsIo
+
+      val pwm = Module(new PWM)
+      io.pwm :<>= pwm.io
+
+      val blinker = Module(new Blinker)
+      io.ledr := blinker.io.ledr
+      io.ledg := blinker.io.ledg
   }
-
-  private val pwm = Module(new PWM)
-  io.pwm :<>= pwm.io
-
-  private val blinker = Module(new Blinker)
-  io.ledr := blinker.io.ledr
-  io.ledg := blinker.io.ledg
 }
 
 class CXXRTLTestbench extends BlackBox {
@@ -89,7 +94,7 @@ class Blinker(implicit platform: Platform) extends Module {
 
 object Top extends App {
   def apply(
-      baud: Int = 230_400,
+      baud: Int = 9_600,
   )(implicit platform: ElaboratablePlatform) =
     platform(new Top(baud = baud))
 
