@@ -5,10 +5,19 @@
 #include "CXXRTLTestbench.h"
 #include "simassert.h"
 
+#define INPUT_COUNT 1 // XXX: 1->6
+
 CXXRTLTestbench::CXXRTLTestbench()
-    : _finished(false), _uart(9600, p_tx, p_rx), _rd(), _mt(_rd()) {
+    : _finished(false), _uart(9600, p_tx, p_rx), _inputs(), _state(sSetup),
+      _timer(2) {
   simassert(_inst == nullptr, "CXXRTLTestbench already exists");
   _inst = this;
+
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<uint8_t> dist(0, 255);
+  for (int i = 0; i < INPUT_COUNT; ++i)
+    _inputs.push(dist(mt));
 }
 
 CXXRTLTestbench::~CXXRTLTestbench() {
@@ -27,10 +36,25 @@ void CXXRTLTestbench::reset() { p_tx = wire<1>{1u}; }
 
 bool CXXRTLTestbench::eval(performer *performer) {
   bool converged = true;
-  std::uniform_int_distribution<uint8_t> dist(0, 255);
 
   if (this->posedge_p_clock()) {
-    // ...
+    std::cout << "." << std::flush;
+    if (_state != sSetup)
+      _uart.cycle();
+
+    switch (_state) {
+    case sSetup:
+      if (--_timer == 0) {
+        _state = sInitialStable;
+        _timer = _uart.divisor() * 2;
+      }
+      break;
+    case sInitialStable:
+      if (--_timer == 0) {
+        _finished = true;
+      }
+      break;
+    }
   }
 
   return converged;

@@ -24,9 +24,12 @@ private:
   bool _finished;
 
   UART _uart;
-
-  std::random_device _rd;
-  std::mt19937 _mt;
+  std::queue<uint8_t> _inputs;
+  enum state {
+    sSetup,
+    sInitialStable,
+  } _state;
+  unsigned int _timer;
 };
 
 #endif

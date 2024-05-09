@@ -37,7 +37,6 @@ class Top(val baud: Int = 9600)(implicit platform: Platform)
   def createIo() = new TopIO
 
   private val uart = Module(new UART(baud = baud))
-  io.pins :<>= uart.pinsIo
 
   uart.txIo.bits  := uart.rxIo.bits.byte
   uart.txIo.valid := uart.txIo.ready && uart.rxIo.valid && !uart.rxIo.bits.err
@@ -46,10 +45,13 @@ class Top(val baud: Int = 9600)(implicit platform: Platform)
   platform match {
     case CXXRTLPlatform =>
       val bb = Module(new CXXRTLTestbench)
-      bb.io.clock := clock
-      bb.io.rx    := io.pins.rx
-      io.pins.tx  := bb.io.tx
+      bb.io.clock    := clock
+      uart.pinsIo.rx := bb.io.tx
+      bb.io.rx       := uart.pinsIo.tx
+
+      io.pins.tx := DontCare
     case _ =>
+      io.pins :<>= uart.pinsIo
   }
 
   private val pwm = Module(new PWM)
