@@ -28,6 +28,9 @@ lazy val cxxsim = inputKey[Unit]("Elaborate, build cxxsim, and run it")
 cxxsim := {
   (Compile / run).evaluated
   if (("make cxxsim" !) != 0) {
-    throw new IllegalStateException("cxxsim failed")
+    throw new IllegalStateException("cxxsim failed to build")
+  }
+  if (("build/cxxsim --vcd" !) != 0) {
+    throw new IllegalStateException("cxxsim run failed")
   }
 }

@@ -9,7 +9,7 @@ CXXSIM_CC = $(ARTIFACT_PREFIX).cc
 CXXSIM_BLACKBOX_IL = cxxsim/blackboxes.il
 CXXSIM_SRCS = $(CXXSIM_CC) $(wildcard cxxsim/*.cc)
 CXXSIM_OBJS = $(subst cxxsim/,$(BUILD_DIR)/,$(patsubst %.cc,%.o,$(CXXSIM_SRCS)))
-CXXSIM_OPTS = -std=c++14 -g -Wall -pedantic -Wno-zero-length-array
+CXXSIM_OPTS = -std=c++14 -g -pedantic -Wall -Wextra -Wno-zero-length-array -Wno-unused-parameter
 # -O3 makes a huge difference to running time.
 # -fsanitize=address -fno-omit-frame-pointer for extra de🐞.
 
@@ -51,7 +51,6 @@ $(ARTIFACT_PREFIX).json: $(BASENAME)-ice40.sv
 		-p 'write_json $@'
 
 cxxsim: $(CXXSIM_EXE)
-	$< --vcd
 
 $(CXXSIM_EXE): $(CXXSIM_CC) $(CXXSIM_OBJS)
 

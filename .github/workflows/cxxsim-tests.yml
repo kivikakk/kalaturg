@@ -34,5 +34,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Elaborate
       run: sbt run
-    - name: Run cxxsim tests
+    - name: Build cxxsim
       run: make -j4 cxxsim CXX=clang++-15
+    - name: Run cxxsim
+      run: build/cxxsim --vcd
