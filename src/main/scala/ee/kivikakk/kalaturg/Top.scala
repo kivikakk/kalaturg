@@ -43,7 +43,7 @@ class Top(val baud: Int)(implicit platform: Platform)
   uart.rxIo.ready := uart.txIo.ready
 
   platform match {
-    case CXXRTLPlatform =>
+    case CXXRTLPlatform(_) =>
       val bb = Module(new CXXRTLTestbench)
       bb.io.clock    := clock
       uart.pinsIo.rx := bb.io.tx
@@ -103,7 +103,7 @@ object Top extends App {
     "-disable-all-randomization",
     "-strip-debug-info",
   )
-  for { platform <- Seq(CXXRTLPlatform, ICE40Platform) } {
+  for { platform <- Seq(CXXRTLPlatform(clockHz = 3_000_000), ICE40Platform) } {
     val verilog = ChiselStage.emitSystemVerilog(
       Top()(platform = platform),
       firtoolOpts = firtoolOpts,
