@@ -11,6 +11,9 @@ class UART(val baud: Int = 9600)(implicit platform: Platform) extends Module {
   val rxIo   = IO(Decoupled(new RXOut))
   val pinsIo = IO(new PinsIO)
 
+  // Note that UART's meant to be LSB first (!), so we're backwards.
+  // Echo tests of course don't reveal this.
+
   val rx = Module(new RX(divisor))
   rxIo :<>= Queue(rx.io, 32, useSyncReadMem = true)
   rx.pinIo := pinsIo.rx
