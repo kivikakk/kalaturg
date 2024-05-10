@@ -26,13 +26,11 @@ class RX(private val divisor: Int) extends Module {
   private val counterReg = RegInit(0.U(unsignedBitLength(9).W))
   private val shiftReg   = RegInit(0.U(10.W))
 
-  // |_s_|_1_|_2_|_3_|_4_|_5_|_6_|_7_|_8_|_S_|_!
+  // |_s_|_1_|_2_|_3_|_4_|_5_|_6_|_7_|_8_|_S
   // ^-- counterReg := 9, state := sRx
   //   ^-- timer hits 0 for the first time, counterReg 9->8
   //       ^-- timer hits 0, counterReg 8->7
-  //                                       ^-- 1->0
-  //                                           ^-- 0->-1. We finish here, a little late?
-  // Is that better or worse than finishing right on time?
+  //                                       ^-- 0->-1. Finish @ half STOP bit.
 
   // Reset valid when "consumed".
   when(io.ready) {
