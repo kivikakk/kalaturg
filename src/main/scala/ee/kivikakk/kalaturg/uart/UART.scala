@@ -4,8 +4,7 @@ import chisel3._
 import chisel3.util._
 import ee.hrzn.chryse.platform.Platform
 
-class UART(val baud: Int = 9600)(implicit platform: Platform)
-    extends Module {
+class UART(val baud: Int = 9600)(implicit platform: Platform) extends Module {
   val divisor = platform.clockHz / baud
 
   val txIo   = IO(Flipped(Decoupled(UInt(8.W))))
