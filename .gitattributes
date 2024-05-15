@@ -1,7 +1,0 @@
-# I want SystemVerilog excluded from stats, but included in diffs! Why? So
-# I can see .sv changes from revision to revision. This sounds to me more
-# "documentation" than "vendored", which are the two options for getting what
-# I want.
-# See: https://github.com/github-linguist/linguist/blob/master/docs/overrides.md
-*.sv linguist-documentation
-
