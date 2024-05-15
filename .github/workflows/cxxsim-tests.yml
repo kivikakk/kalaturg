@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  synth-ice40:
+  cxxsim-tests:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Chryse

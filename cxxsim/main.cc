@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-#include <Top.h>
 #include <cxxrtl/cxxrtl_vcd.h>
+#include <kalaturg.h>
 
 #include "CXXRTLTestbench.h"
 #include "simassert.h"
