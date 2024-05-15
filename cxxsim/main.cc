@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   top.step();
   vcd.sample(vcd_time++);
 
-  top.p_clock.set(true);
+  top.p_clock.set(false);
   top.step();
   vcd.sample(vcd_time++);
 
