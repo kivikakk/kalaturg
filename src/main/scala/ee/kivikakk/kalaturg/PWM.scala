@@ -29,7 +29,7 @@ class PWM(implicit platform: Platform) extends Module {
 
   private val rgbVecReg = RegInit(VecInit(255.U(8.W), 0.U, 0.U))
 
-  private val potency = 0.5
+  private val potency = 0.3
   io.pmod1a1 := pwmValue(rgbVecReg(0), potency)
   io.pmod1a2 := pwmValue(rgbVecReg(1), potency)
   io.pmod1a3 := pwmValue(rgbVecReg(2), potency)

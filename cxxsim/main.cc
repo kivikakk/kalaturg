@@ -6,7 +6,6 @@
 #include <cxxrtl/cxxrtl_vcd.h>
 
 #include "CXXRTLTestbench.h"
-#include "main.h"
 #include "simassert.h"
 
 static bool caught_sigint = false;
@@ -30,11 +29,11 @@ int main(int argc, char **argv) {
   // SYNCHRONOUS RESET lol.
   top.p_reset.set(true);
 
-  top.CLOCK_WIRE.set(true);
+  top.p_clock.set(true);
   top.step();
   vcd.sample(vcd_time++);
 
-  top.CLOCK_WIRE.set(true);
+  top.p_clock.set(true);
   top.step();
   vcd.sample(vcd_time++);
 
@@ -43,11 +42,11 @@ int main(int argc, char **argv) {
   int ret = 0;
   try {
     while (!bench.finished()) {
-      top.CLOCK_WIRE.set(true);
+      top.p_clock.set(true);
       top.step();
       vcd.sample(vcd_time++);
 
-      top.CLOCK_WIRE.set(false);
+      top.p_clock.set(false);
       top.step();
       vcd.sample(vcd_time++);
 

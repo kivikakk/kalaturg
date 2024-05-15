@@ -2,14 +2,14 @@ package ee.kivikakk.kalaturg
 
 import _root_.circt.stage.ChiselStage
 import chisel3._
+import ee.hrzn.chryse.ChryseApp
 import ee.hrzn.chryse.HasIO
-import ee.hrzn.chryse.platform.ElaboratablePlatform
+import ee.hrzn.chryse.platform.BoardPlatform
 import ee.hrzn.chryse.platform.Platform
+import ee.hrzn.chryse.platform.cxxrtl.CXXRTLOptions
 import ee.hrzn.chryse.platform.cxxrtl.CXXRTLPlatform
 import ee.hrzn.chryse.platform.ice40.ICE40Platform
 import ee.kivikakk.kalaturg.uart.UART
-
-import java.io.PrintWriter
 
 // Notes:
 // - Buttons and LEDs are active-low.
@@ -17,7 +17,6 @@ import java.io.PrintWriter
 // - `+` and `-` are truncating by default (to the larger of the inputs),
 //   equivalent to `+%` and `-%`. Use `+&` or `-%` to widen.
 // - `Reg` is completely disconnected from reset.
-// - Look into `DontCare`.
 
 class TopIO extends Bundle {
   val pins = new uart.PinsIO
@@ -61,26 +60,17 @@ class Top(val baud: Int)(implicit platform: Platform)
   }
 }
 
-object Top extends App {
-  def apply(
-      baud: Int = 9_600,
-  )(implicit platform: ElaboratablePlatform) =
-    platform(new Top(baud = baud))
-
-  private val firtoolOpts = Array(
-    "--lowering-options=disallowLocalVariables",
-    "-disable-all-randomization",
-    "-strip-debug-info",
+object Top extends ChryseApp {
+  override val name            = "kalaturg"
+  override val targetPlatforms = Seq(ICE40Platform(ubtnReset = true))
+  override val cxxrtlOptions = Some(
+    CXXRTLOptions(
+      clockHz = 3_000_000,
+      blackboxes = Seq(
+        classOf[CXXRTLTestbench],
+      ),
+    ),
   )
-  for { platform <- Seq(CXXRTLPlatform(clockHz = 3_000_000), ICE40Platform) } {
-    val verilog = ChiselStage.emitSystemVerilog(
-      Top()(platform = platform),
-      firtoolOpts = firtoolOpts,
-    )
-    new PrintWriter(s"Top-${platform.id}.sv", "utf-8") {
-      try
-        write(verilog)
-      finally close()
-    }
-  }
+
+  override def genTop(implicit platform: Platform) = new Top(9600)
 }

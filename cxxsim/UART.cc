@@ -1,5 +1,4 @@
 #include "UART.h"
-#include "main.h"
 #include "simassert.h"
 
 UART::UART(unsigned int baud, cxxrtl::wire<1> &tx_wire,
