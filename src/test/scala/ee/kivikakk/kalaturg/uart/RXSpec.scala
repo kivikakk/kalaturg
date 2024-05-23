@@ -1,11 +1,10 @@
 package ee.kivikakk.kalaturg.uart
 
 import chisel3._
-import chiseltest._
+import chisel3.simulator.EphemeralSimulator._
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
 
-class RXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+class RXSpec extends AnyFlatSpec {
   behavior.of("RX")
 
   private def pokeBits(
@@ -37,7 +36,11 @@ class RXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   }
 
   it should "receive a byte" in {
-    test(new RX(divisor = 3)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
+    simulate(new RX(divisor = 3)) { c =>
+      c.reset.poke(true.B)
+      c.clock.step()
+      c.reset.poke(false.B)
+
       pokeBits(c, Seq(0, 1, 0, 1, 0, 1, 1, 0, 0, 1))
 
       c.io.valid.expect(true.B)
@@ -50,7 +53,11 @@ class RXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   }
 
   it should "report a bad START" in {
-    test(new RX(divisor = 3)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
+    simulate(new RX(divisor = 3)) { c =>
+      c.reset.poke(true.B)
+      c.clock.step()
+      c.reset.poke(false.B)
+
       pokeBits(c, Seq(1, 1, 0, 1, 0, 1, 1, 0, 0, 1), forceStart = true)
 
       c.io.valid.expect(true.B)
@@ -60,7 +67,11 @@ class RXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   }
 
   it should "make a difference if forceStart = false" in {
-    test(new RX(divisor = 3)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
+    simulate(new RX(divisor = 3)) { c =>
+      c.reset.poke(true.B)
+      c.clock.step()
+      c.reset.poke(false.B)
+
       pokeBits(c, Seq(1, 1, 0, 1, 0, 1, 1, 0, 0, 1))
 
       c.io.valid.expect(false.B)

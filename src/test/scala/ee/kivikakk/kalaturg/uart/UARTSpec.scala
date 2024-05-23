@@ -1,24 +1,26 @@
 package ee.kivikakk.kalaturg.uart
 
 import chisel3._
-import chiseltest._
-import chiseltest.simulator.WriteVcdAnnotation
+import chisel3.simulator.EphemeralSimulator._
 import ee.hrzn.chryse.platform.Platform
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
 
-class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+class UARTSpec extends AnyFlatSpec {
   behavior.of("UART")
 
   // These tests are *really* ugly, but they work for now. Need more clarity.
 
-  implicit private val platform: Platform = new Platform {
+  implicit val platform: Platform = new Platform {
     val id      = "uartspec"
     val clockHz = 3
   }
 
   it should "receive a byte" in {
-    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
+    simulate(new UART(baud = 1)) { c =>
+      c.reset.poke(true.B)
+      c.clock.step()
+      c.reset.poke(false.B)
+
       // Assert START and hold for one bit.
       c.pinsIo.rx.poke(false.B)
 
@@ -59,7 +61,11 @@ class UARTSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
   }
 
   it should "transmit a byte" in {
-    test(new UART(baud = 1)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
+    simulate(new UART(baud = 1)) { c =>
+      c.reset.poke(true.B)
+      c.clock.step()
+      c.reset.poke(false.B)
+
       // Generate a byte and request it to be sent.
       val input = (new scala.util.Random).nextInt(256)
       c.txIo.bits.poke(input.U)

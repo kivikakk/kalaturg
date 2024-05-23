@@ -1,19 +1,22 @@
 package ee.kivikakk.kalaturg.uart
 
 import chisel3._
-import chiseltest._
+import chisel3.simulator.EphemeralSimulator._
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
 
-class TXSpec extends AnyFlatSpec with ChiselScalatestTester with Matchers {
+class TXSpec extends AnyFlatSpec {
   behavior.of("TX")
 
   it should "transmit a byte" in {
-    test(new TX(divisor = 3)).withAnnotations(Seq(WriteVcdAnnotation)) { c =>
+    simulate(new TX(divisor = 3)) { c =>
       // Note that poked inputs take effect *immediately* on combinatorial
       // circuits. We want to poke as the first thing we do in any simulated
       // cycle, as if responding to the last cycle.  We do this before any
       // expects -- otherwise we might not observe comb changes correctly.
+      c.reset.poke(true.B)
+      c.clock.step()
+      c.reset.poke(false.B)
+
       c.io.bits.poke("b10101100".U)
       c.io.valid.poke(true.B)
 
