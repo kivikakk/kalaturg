@@ -1,4 +1,4 @@
-name: iCE40 synthesis
+name: iCEBreaker synthesis
 
 on:
   push:
@@ -10,11 +10,11 @@ permissions:
   contents: read
 
 jobs:
-  synth-ice40:
+  synth-icebreaker:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Chryse
-      uses: chryse-hdl/setup-chryse-action@v1
+      uses: chryse-hdl/setup-chryse-action@v2
       with:
         install-oss-cad-suite: true
         github-token: ${{ secrets.GITHUB_TOKEN }}
