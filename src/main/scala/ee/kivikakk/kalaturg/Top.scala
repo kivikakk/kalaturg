@@ -16,16 +16,8 @@ import ee.kivikakk.kalaturg.uart.UART
 //   equivalent to `+%` and `-%`. Use `+&` or `-%` to widen.
 // - `Reg` is completely disconnected from reset.
 
-class TopIO extends Bundle {
-  val pins = new uart.PinsIO
-  val ledr = Output(Bool())
-  val ledg = Output(Bool())
-
-  val pwm = new PWMIO
-}
-
 class Top(val baud: Int)(implicit platform: Platform) extends Module {
-  override def desiredName = "chrysetop"
+  override def desiredName = "kalaturg"
 
   private val uart = Module(new UART(baud = baud))
 

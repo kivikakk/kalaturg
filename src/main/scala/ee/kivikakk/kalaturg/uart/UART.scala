@@ -7,9 +7,12 @@ import ee.hrzn.chryse.platform.Platform
 class UART(val baud: Int = 9600)(implicit platform: Platform) extends Module {
   val divisor = platform.clockHz / baud
 
-  val txIo   = IO(Flipped(Decoupled(UInt(8.W))))
-  val rxIo   = IO(Decoupled(new RXOut))
-  val pinsIo = IO(new PinsIO)
+  val txIo = IO(Flipped(Decoupled(UInt(8.W))))
+  val rxIo = IO(Decoupled(new RXOut))
+  val pinsIo = IO(new Bundle {
+    val rx = Input(Bool())
+    val tx = Output(Bool())
+  })
 
   // Note that UART's meant to be LSB first (!), so we're backwards.
   // Echo tests of course don't reveal this.

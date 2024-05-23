@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Chryse
-      uses: chryse-hdl/setup-chryse-action@v1
+      uses: chryse-hdl/setup-chryse-action@v2
 
     - name: Checkout repo
       uses: actions/checkout@v4

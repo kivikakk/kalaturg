@@ -4,14 +4,12 @@ import chisel3._
 import chisel3.util._
 import ee.hrzn.chryse.platform.Platform
 
-class PWMIO extends Bundle {
-  val pmod1a1 = Output(Bool())
-  val pmod1a2 = Output(Bool())
-  val pmod1a3 = Output(Bool())
-}
-
 class PWM(implicit platform: Platform) extends Module {
-  val io = IO(new PWMIO)
+  val io = IO(new Bundle {
+    val pmod1a1 = Output(Bool())
+    val pmod1a2 = Output(Bool())
+    val pmod1a3 = Output(Bool())
+  })
 
   // Produces a square wave over period `period` cycles with duty `din/period`.
   private def pwm(period: Int, din: UInt) = {

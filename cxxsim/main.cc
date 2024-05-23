@@ -14,7 +14,7 @@ static void sigint_handler(int signum) { caught_sigint = true; }
 int main(int argc, char **argv) {
   signal(SIGINT, sigint_handler);
 
-  cxxrtl_design::p_chrysetop top;
+  cxxrtl_design::p_kalaturg top;
   debug_items di;
   top.debug_info(&di, nullptr, "top ");
 
