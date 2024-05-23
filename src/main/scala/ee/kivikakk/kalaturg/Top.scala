@@ -3,12 +3,10 @@ package ee.kivikakk.kalaturg
 import _root_.circt.stage.ChiselStage
 import chisel3._
 import ee.hrzn.chryse.ChryseApp
-import ee.hrzn.chryse.HasIO
-import ee.hrzn.chryse.platform.BoardPlatform
 import ee.hrzn.chryse.platform.Platform
 import ee.hrzn.chryse.platform.cxxrtl.CXXRTLOptions
 import ee.hrzn.chryse.platform.cxxrtl.CXXRTLPlatform
-import ee.hrzn.chryse.platform.ice40.ICE40Platform
+import ee.hrzn.chryse.platform.ice40.IceBreakerPlatform
 import ee.kivikakk.kalaturg.uart.UART
 
 // Notes:
@@ -26,10 +24,8 @@ class TopIO extends Bundle {
   val pwm = new PWMIO
 }
 
-class Top(val baud: Int)(implicit platform: Platform)
-    extends Module
-    with HasIO[TopIO] {
-  def createIo() = new TopIO
+class Top(val baud: Int)(implicit platform: Platform) extends Module {
+  override def desiredName = "chrysetop"
 
   private val uart = Module(new UART(baud = baud))
 
@@ -44,25 +40,27 @@ class Top(val baud: Int)(implicit platform: Platform)
       uart.pinsIo.rx := bb.io.tx
       bb.io.rx       := uart.pinsIo.tx
 
-      io.pins.tx := DontCare
-      io.pwm     := DontCare
-      io.ledr    := DontCare
-      io.ledg    := DontCare
-    case _ =>
-      io.pins :<>= uart.pinsIo
+    case plat: IceBreakerPlatform =>
+      // TODO: can we expose resource.UART as a bundle instead?
+      uart.pinsIo.rx         := plat.resources.uart.rx
+      plat.resources.uart.tx := uart.pinsIo.tx
 
       val pwm = Module(new PWM)
-      io.pwm :<>= pwm.io
+      plat.resources.pmod1a(1).o := pwm.io.pmod1a1
+      plat.resources.pmod1a(2).o := pwm.io.pmod1a2
+      plat.resources.pmod1a(3).o := pwm.io.pmod1a3
 
       val blinker = Module(new Blinker)
-      io.ledr := blinker.io.ledr
-      io.ledg := blinker.io.ledg
+      plat.resources.ledr := blinker.io.ledr
+      plat.resources.ledg := blinker.io.ledg
+    case _ =>
   }
 }
 
 object Top extends ChryseApp {
-  override val name            = "kalaturg"
-  override val targetPlatforms = Seq(ICE40Platform(ubtnReset = true))
+  override val name                                  = "kalaturg"
+  override def genTop()(implicit platform: Platform) = new Top(9600)
+  override val targetPlatforms                       = Seq(IceBreakerPlatform(ubtnReset = true))
   override val cxxrtlOptions = Some(
     CXXRTLOptions(
       clockHz = 3_000_000,
@@ -71,6 +69,4 @@ object Top extends ChryseApp {
       ),
     ),
   )
-
-  override def genTop(implicit platform: Platform) = new Top(9600)
 }
