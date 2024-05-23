@@ -23,4 +23,4 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Elaborate and synthesise
-      run: sbt 'run build ice40'
+      run: sbt 'run build -b icebreaker'
