@@ -26,7 +26,7 @@ class Top(val baud: Int)(implicit platform: Platform) extends Module {
   uart.rxIo.ready := uart.txIo.ready
 
   platform match {
-    case CXXRTLPlatform(_) =>
+    case _: CXXRTLPlatform =>
       val bb = Module(new CXXRTLTestbench)
       bb.io.clock    := clock
       uart.pinsIo.rx := bb.io.tx
@@ -55,7 +55,8 @@ object Top extends ChryseApp {
   override val targetPlatforms                       = Seq(IceBreakerPlatform(ubtnReset = true))
   override val cxxrtlOptions = Some(
     CXXRTLOptions(
-      clockHz = 3_000_000,
+      platforms =
+        Seq(new CXXRTLPlatform(id = "cxxrtl", clockHz = 3_000_000) {}),
       blackboxes = Seq(
         classOf[CXXRTLTestbench],
       ),
